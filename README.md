@@ -22,7 +22,7 @@ Proyek ini dibangun menggunakan kombinasi bahasa pemrograman dasar, framework mo
 * **Laravel Blade Engine**: Mesin template bawaan Laravel yang digunakan untuk menyusun struktur HTML dinamis secara modular (komponen, *layouting*, dan *data binding*).
 
 ### 🚀 Framework & Library
-* **Backend Framework**: **Laravel (v12.x+)** – Framework PHP yang tangguh untuk mengelola rute, kontroler, keamanan, dan ORM (Eloquent).
+* **Backend Framework**: **Laravel (v13.x+)** – Framework PHP yang tangguh untuk mengelola rute, kontroler, keamanan, dan ORM (Eloquent).
 * **Authentication Kit**: **Laravel Breeze** – Direkomendasikan sebagai sistem otentikasi siap pakai karena berbasis Blade dan Tailwind, sangat fleksibel untuk dikonfigurasi menjadi *multi-role*.
 * **Frontend CSS Framework**: **Tailwind CSS** – Framework CSS berbasis *utility-first* untuk mempercepat proses *slicing* UI yang responsif dan modern.
 * **Frontend JS Library**: **Alpine.js** – Library JavaScript yang sangat ringan untuk menghidupkan komponen UI (seperti modal, pencarian dinamis, dan interaksi *upvote*) langsung di dalam file Blade tanpa *reload* halaman.
