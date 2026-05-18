@@ -22,7 +22,7 @@ Proyek ini dibangun menggunakan kombinasi bahasa pemrograman dasar, framework mo
 * **Laravel Blade Engine**: Mesin template bawaan Laravel yang digunakan untuk menyusun struktur HTML dinamis secara modular (komponen, *layouting*, dan *data binding*).
 
 ### 🚀 Framework & Library
-* **Backend Framework**: **Laravel (v12.x+)** – Framework PHP yang tangguh untuk mengelola rute, kontroler, keamanan, dan ORM (Eloquent).
+* **Backend Framework**: **Laravel (v13.x+)** – Framework PHP yang tangguh untuk mengelola rute, kontroler, keamanan, dan ORM (Eloquent).
 * **Authentication Kit**: **Laravel Breeze** – Direkomendasikan sebagai sistem otentikasi siap pakai karena berbasis Blade dan Tailwind, sangat fleksibel untuk dikonfigurasi menjadi *multi-role*.
 * **Frontend CSS Framework**: **Tailwind CSS** – Framework CSS berbasis *utility-first* untuk mempercepat proses *slicing* UI yang responsif dan modern.
 * **Frontend JS Library**: **Alpine.js** – Library JavaScript yang sangat ringan untuk menghidupkan komponen UI (seperti modal, pencarian dinamis, dan interaksi *upvote*) langsung di dalam file Blade tanpa *reload* halaman.
@@ -78,6 +78,15 @@ CivilWatch menggunakan pendekatan basis data relasional untuk memastikan integri
 - Satu **user** dapat memberikan upvote pada banyak **report**.
 - Satu **report** dapat menerima upvote dari banyak **user**.
 - Relasi ini diimplementasikan melalui tabel pivot **upvotes**.
+
+### 📂 Daftar Tabel Basis Data
+
+Berikut adalah daftar tabel PostgreSQL yang diimplementasikan di dalam sistem:
+* 👤 **`users`** : Menyimpan data informasi akun milik warga maupun admin/petugas.
+* 🗺️ **`districts`** : Tabel master untuk menyimpan daftar kecamatan atau wilayah administratif.
+* 📋 **`reports`** : Pusat data utama yang menampung seluruh berkas laporan pengaduan dari warga.
+* 🛠️ **`progress_updates`** : Menyimpan riwayat catatan perkembangan pengerjaan dari pihak petugas.
+* 👍 **`upvotes`** : Tabel perantara (*pivot table*) untuk menangani sistem dukungan publik warga.
 
 ## 👥 Struktur Proyek & Pembagian Kerja Tim
 
