@@ -11,13 +11,24 @@
 - [Panduan Instalasi](#-panduan-instalasi)
 - [Tujuan Akademik](#-tujuan-akademik)
 
-## 🧰 Tech Stack
+## 🧰 Tech Stack & Kebutuhan Teknis
 
-- **Backend**: Laravel
-- **Frontend CSS**: Tailwind CSS
-- **Frontend JS**: Alpine.js (interaktivitas ringan dengan pengalaman SPA-like)
-- **Database**: PostgreSQL
+Proyek ini dibangun menggunakan kombinasi bahasa pemrograman dasar, framework modern, serta alat pengembangan berikut:
 
+### 🌐 Bahasa Pemrograman & Templating
+* **PHP (v8.x+)**: Bahasa utama untuk pengembangan logika di sisi *backend* (server-side).
+* **JavaScript (ES6+)**: Digunakan untuk menangani logika interaktif di sisi *client-side*.
+* **CSS3**: Bahasa dasar untuk penataan gaya global dan *custom styling* antarmuka.
+* **Laravel Blade Engine**: Mesin template bawaan Laravel yang digunakan untuk menyusun struktur HTML dinamis secara modular (komponen, *layouting*, dan *data binding*).
+
+### 🚀 Framework & Library
+* **Backend Framework**: **Laravel (v12.x+)** – Framework PHP yang tangguh untuk mengelola rute, kontroler, keamanan, dan ORM (Eloquent).
+* **Authentication Kit**: **Laravel Breeze** – Direkomendasikan sebagai sistem otentikasi siap pakai karena berbasis Blade dan Tailwind, sangat fleksibel untuk dikonfigurasi menjadi *multi-role*.
+* **Frontend CSS Framework**: **Tailwind CSS** – Framework CSS berbasis *utility-first* untuk mempercepat proses *slicing* UI yang responsif dan modern.
+* **Frontend JS Library**: **Alpine.js** – Library JavaScript yang sangat ringan untuk menghidupkan komponen UI (seperti modal, pencarian dinamis, dan interaksi *upvote*) langsung di dalam file Blade tanpa *reload* halaman.
+
+### 🗄️ Manajemen Data
+* **Database**: **PostgreSQL** – Sistem manajemen basis data relasional tingkat perusahaan yang digunakan untuk mengelola relasi data kompleks (*One-to-Many* dan *Many-to-Many*) dengan performa tinggi.
 ## ✨ Fitur Utama
 
 - 🔐 **Multi-User Authentication**
@@ -72,11 +83,15 @@ CivilWatch menggunakan pendekatan basis data relasional untuk memastikan integri
 
 Proyek tugas akhir ini dikerjakan oleh **tim berisi 3 orang** dengan pembagian peran, tanggung jawab *Controller*, dan file logika yang terisolasi untuk menghindari konflik repositori (*git merge conflict*):
 
+## 👥 Struktur Proyek & Pembagian Kerja Tim
+
+Proyek tugas akhir ini dikerjakan oleh **tim berisi 3 orang** dengan pembagian peran, tanggung jawab *Controller*, dan file logika yang terisolasi untuk menghindari konflik repositori (*git merge conflict*):
+
 ### 👨‍💻 Backend Developer 1 (Database Architect & Foundation)
 Fokus pada arsitektur dasar basis data, sistem keamanan otentikasi, dan pengelolaan data master:
 * **Inisiasi Proyek:** Setup awal repositori Git, inisialisasi proyek Laravel, dan konfigurasi koneksi database PostgreSQL lokal.
 * **Database Architect:** Membuat seluruh file *Migration* (5 tabel) beserta definisi relasi *Eloquent* lengkap di dalam file Model Laravel sejak awal proyek.
-* **Autentikasi Multi-Role (`AuthController`):** Mengimplementasikan fitur registrasi, login, dan logout multi-role (`admin` dan `citizen`) memanfaatkan Laravel Breeze (versi Blade).
+* **Otentikasi Laravel Breeze (Core Auth):** Menginstalasi package Laravel Breeze (versi Blade), memodifikasi *migration* tabel `users` untuk kolom `role`, serta mengatur logika *Middleware* untuk pengalihan (*redirect*) otomatis: Admin ke Dashboard Admin, Citizen ke Public Feed.
 * **Manajemen Wilayah (`DistrictController`):** Mengembangkan rute dan logika CRUD penuh untuk mengelola data master kecamatan/wilayah di panel Admin.
 
 ### 🧠 Backend Developer 2 (Core Business Logic & API)
@@ -89,6 +104,7 @@ Fokus pada alur bisnis pengaduan, manipulasi file media, relasi data dinamis, da
 ### 🎨 Frontend Developer (UI/UX & Interactive Specialist)
 Fokus pada estetika visual, tata letak responsif, dan menghidupkan komponen interaktif menggunakan framework CSS dan library JS:
 * **Base Layouting (Tailwind CSS):** Merancang arsitektur tampilan dasar aplikasi, mulai dari Navbar dinamis (berubah otomatis berdasarkan role user yang login), Sidebar Admin, hingga Footer.
+* **Kustomisasi Tampilan Auth (Breeze Views):** Menata ulang dan mempercantik halaman Login dan Register yang di-generat oleh Laravel Breeze agar memiliki komponen visual dan tema warna yang serasi dengan aplikasi CivilWatch.
 * **Slicing Views & Forms (Laravel Blade):** Membangun antarmuka halaman *Landing Page*, *Public Feed* (daftar kartu laporan), form pembuatan laporan warga, hingga panel Dashboard visual.
 * **Interaktivitas Client-Side (Alpine.js):** Menghidupkan komponen interaktif seperti bilah pencarian (*search bar*) dinamis untuk menyaring subjek laporan secara instan di layar.
 * **Integrasi Data & AJAX:** Menghubungkan tombol **Upvote** pada komponen Blade menggunakan Alpine.js (menggunakan Fetch/Axios) untuk menembak endpoint milik *Backend 2*, sehingga angka dukungan langsung terbarui secara *real-time* tanpa perlu memuat ulang (*reload*) halaman.
