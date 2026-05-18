@@ -79,6 +79,15 @@ CivilWatch menggunakan pendekatan basis data relasional untuk memastikan integri
 - Satu **report** dapat menerima upvote dari banyak **user**.
 - Relasi ini diimplementasikan melalui tabel pivot **upvotes**.
 
+### 📂 Daftar Tabel Basis Data
+
+Berikut adalah daftar tabel PostgreSQL yang diimplementasikan di dalam sistem:
+* 👤 **`users`** : Menyimpan data informasi akun milik warga maupun admin/petugas.
+* 🗺️ **`districts`** : Tabel master untuk menyimpan daftar kecamatan atau wilayah administratif.
+* 📋 **`reports`** : Pusat data utama yang menampung seluruh berkas laporan pengaduan dari warga.
+* 🛠️ **`progress_updates`** : Menyimpan riwayat catatan perkembangan pengerjaan dari pihak petugas.
+* 👍 **`upvotes`** : Tabel perantara (*pivot table*) untuk menangani sistem dukungan publik warga.
+
 ## 👥 Struktur Proyek & Pembagian Kerja Tim
 
 Proyek tugas akhir ini dikerjakan oleh **tim berisi 3 orang** dengan pembagian peran, tanggung jawab *Controller*, dan file logika yang terisolasi untuk menghindari konflik repositori (*git merge conflict*):
