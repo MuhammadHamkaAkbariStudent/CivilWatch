@@ -3,6 +3,10 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UpvoteController;
+use App\Http\Controllers\ProgressUpdateController;
+use App\Http\Controllers\DashboardController;
 
 // =========================================================================
 // 🌍 1. AKSES PUBLIK & OTENTIKASI (Tanpa Login)
@@ -50,7 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
+    Route::post('/reports/{id}/upvote', [UpvoteController::class, 'toggle'])->name('reports.upvote');
     // Tempat penulisan rute POST Upvote (Many-to-Many) oleh Backend Dev 2 nanti
     // Route::post('/reports/{id}/upvote', ...)->name('reports.upvote');
 });
@@ -82,6 +86,11 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
     })->name('dashboard'); // 👈 Nama otomatis menjadi 'citizen.dashboard'
 
     // Tempat penulisan rute CRUD Laporan Warga (create, store, edit, update, destroy) oleh Backend Dev 2 nanti
+    // Rute Dashboard kini diarahkan ke controller
+    Route::get('/dashboard', [DashboardController::class, 'citizen'])->name('dashboard');
+
+    // Rute CRUD Laporan Warga
+    Route::resource('reports', ReportController::class);
 });
 
 
@@ -108,4 +117,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     })->name('dashboard'); // 👈 Nama otomatis menjadi 'admin.dashboard'
 
     // Tempat penulisan rute CRUD Kelola Wilayah (District) dan Manajemen Laporan Admin oleh Backend Dev 1 & 2 nanti
+    // Rute Dashboard Admin kini diarahkan ke controller
+    Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+
+    // Rute Progress Update
+    Route::post('/reports/{report_id}/progress', [ProgressUpdateController::class, 'store'])->name('reports.progress.store');
+
+    // Rute Verifikasi Status oleh Admin
+    Route::patch('/reports/{id}/status', [ReportController::class, 'updateStatus'])->name('reports.update-status');
 });
