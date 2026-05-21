@@ -15,36 +15,13 @@ use App\Http\Controllers\DistrictController;
 
 Route::get('/', function () {
     return view('welcome');
-})->name('home'); // 👈 Penamaan rute ditambahkan
+})->name('home');
 
-// Halaman 5: Public Feed
-Route::get('/feed', function () {
-    // Mengecek status menggunakan satu baris ringkas (Ternary Operator)
-    $status = Auth::check() 
-        ? '<p style="color: blue;">(Halo, kamu sedang login sebagai: ' . Auth::user()->role . ')</p>' 
-        : '<p style="color: gray;">(Kamu sedang melihat halaman ini sebagai Pengunjung Publik / Belum Login).</p>';
-    
-    $tampilan = '<h1>[DUMMY] Ini Public Feed Warga. Frontend silakan ganti dengan view.</h1>' . $status;
+// Halaman 5: Public Feed (Diarahkan langsung ke fungsi yang sudah kita buat)
+Route::get('/feed', [ReportController::class, 'publicFeed'])->name('feed');
 
-    // Tombol logout HANYA muncul jika ada yang login
-    if (Auth::check()) {
-        $tampilan .= '
-            <form method="POST" action="/logout">
-                ' . csrf_field() . '
-                <button type="submit" style="padding: 10px 20px; background-color: #ef4444; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    Test Log Out 🚪
-                </button>
-            </form>
-        ';
-    }
-
-    return $tampilan;
-})->name('feed'); // 👈 Penamaan rute ditambahkan
-
-// Halaman 6: Detail Laporan Publik
-Route::get('/reports/{id}', function ($id) {
-    return '<h1>[DUMMY] Detail Laporan ID: ' . $id . '. Frontend silakan ganti dengan view.</h1>';
-})->name('reports.show'); // 👈 Penamaan rute ditambahkan
+// Halaman 6: Detail Laporan Publik (Akan dibuatkan fungsinya oleh Backend 2)
+Route::get('/reports/{id}', [ReportController::class, 'publicShow'])->name('reports.show');
 
 
 // =========================================================================
@@ -82,26 +59,22 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
 // =========================================================================
 // 👇 Menambahkan prefix URL '/admin' dan prefix nama 'admin.'
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Tempat penulisan rute CRUD Kelola Wilayah (District) dan Manajemen Laporan Admin oleh Backend Dev 1 & 2 nanti
-    // Rute Dashboard Admin kini diarahkan ke controller
+    
+    // Halaman 10: Admin Dashboard
     Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
 
-    // Halaman 11: Kelola Wilayah (Admin)
+    // Halaman 11: Kelola Wilayah (Dioptimasi dengan except 'show' agar tidak overkill) 👈 Implementasi Revisi
     Route::resource('districts', DistrictController::class)->except(['show']);
 
-    // Halaman 12: Manajemen Laporan (Admin)
-    Route::get('/reports', function () {
-        return '<h1>[DUMMY] Manajemen Laporan (Admin). Frontend silakan ganti dengan view.</h1>';
-    })->name('reports.index');
+    // Halaman 12: Manajemen Laporan Admin
+    Route::get('/reports', [ReportController::class, 'adminIndex'])->name('reports.index');
 
-    // Halaman 13: Detail Laporan + Input Progress (Admin)
-    Route::get('/reports/{id}', function ($id) {
-        return '<h1>[DUMMY] Detail Laporan Admin ID: ' . $id . '. Frontend silakan ganti dengan view.</h1>';
-    })->name('reports.show');
+    // Halaman 13: Detail Laporan Admin (Tampilan mendalam untuk validasi)
+    Route::get('/reports/{id}', [ReportController::class, 'adminShow'])->name('reports.show');
 
-    // Rute Progress Update
+    // Halaman 13 (Bagian Progress): Rute Progress Update
     Route::post('/reports/{report_id}/progress', [ProgressUpdateController::class, 'store'])->name('reports.progress.store');
 
-    // Rute Verifikasi Status oleh Admin
+    // Halaman 13 (Bagian Status): Rute Verifikasi Status oleh Admin
     Route::patch('/reports/{id}/status', [ReportController::class, 'updateStatus'])->name('reports.update-status');
 });
