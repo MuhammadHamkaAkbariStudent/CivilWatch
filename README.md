@@ -36,6 +36,12 @@ CivilWatch dibangun dengan struktur rute yang terorganisir yang menghasilkan **1
 
 ---
 
+## 🌐 Arsitektur & Peta Halaman Aplikasi (Routing Map)
+
+CivilWatch dibangun dengan struktur rute yang terorganisir yang menghasilkan **13 halaman utama** yang terbagi dalam 3 kelompok akses: Publik (6), Citizen (3), dan Admin (4). Berikut adalah rincian mengenai isi komponen dan fungsi dari setiap halaman:
+
+---
+
 ### 🌍 1. Akses Publik & Otentikasi (6 Halaman)
 
 * **Halaman 1: Landing Page (`/`)**
@@ -55,8 +61,8 @@ CivilWatch dibangun dengan struktur rute yang terorganisir yang menghasilkan **1
   * **Fungsi:** Ruang bagi pengguna untuk mengelola keamanan akun dan memperbarui data pribadi secara mandiri.
 
 * **Halaman 5: Public Feed (`/feed`)**
-  * **Isi Halaman:** Kumpulan kartu (*cards*) laporan infrastruktur yang telah diverifikasi, tombol *upvote* interaktif pada setiap kartu laporan, bilah pencarian (*search bar*) kata kunci, dan tombol saringan (*filter dropdown*) kecamatan.
-  * **Fungsi:** Wadah transparansi publik agar seluruh elemen masyarakat dapat melihat, mencari, memantau, dan memberikan dukungan terhadap keluhan fasilitas fisik di berbagai wilayah.
+  * **Isi Halaman:** Kumpulan kartu laporan yang **sudah divalidasi admin** (status: *published*, *in_progress*, atau *resolved*). Laporan baru (*pending*) dan laporan *spam* (*rejected*) otomatis disembunyikan. Dilengkapi tombol *upvote* interaktif, bilah pencarian kata kunci, dan saringan (*filter*) kecamatan.
+  * **Fungsi:** Wadah transparansi publik agar masyarakat dapat melihat, memantau, dan memberikan dukungan suara (*upvote*) terhadap keluhan infrastruktur yang sah di berbagai wilayah secara *real-time*.
 
 * **Halaman 6: Detail Laporan (`/reports/{id}`)**
   * **Isi Halaman:** Tampilan foto penuh bukti kerusakan fisik, deskripsi kronologis aduan, total akumulasi dukungan *upvote*, serta komponen linimasa perkembangan (*Progress Tracking*).
@@ -69,16 +75,16 @@ CivilWatch dibangun dengan struktur rute yang terorganisir yang menghasilkan **1
 Rute di bawah proteksi keamanan *middleware* khusus warga (`role: citizen`):
 
 * **Halaman 7: Citizen Dashboard (`/citizen/dashboard`)**
-  * **Isi Halaman:** Kartu ringkasan status personal (jumlah laporan *pending*, *in_progress*, *resolved*) milik warga bersangkutan, daftar laporan pribadi beserta status masing-masing, tautan *shortcut* menuju form pembuatan laporan baru, serta daftar riwayat aktivitas *upvote* yang pernah diberikan.
-  * **Fungsi:** Ruang kendali pribadi bagi warga untuk melacak kontribusi, memantau status aduannya sendiri secara berkala, dan mengakses laporan yang masih bisa diedit.
+  * **Isi Halaman:** Kartu ringkasan status personal milik warga bersangkutan, daftar laporan pribadi, tautan *shortcut* menuju form laporan baru, serta daftar riwayat *upvote*.
+  * **Fungsi:** Ruang kendali pribadi bagi warga untuk melacak kontribusi dan memantau status aduannya sendiri secara berkala.
 
 * **Halaman 8: Form Buat Laporan (`/citizen/reports/create`)**
-  * **Isi Halaman:** Input judul/subjek masalah, deskripsi lengkap kerusakan, pilihan *dropdown* kecamatan lokasi kejadian, dan komponen unggah (*upload*) file foto bukti fisik.
-  * **Fungsi:** Memfasilitasi warga untuk mengirimkan atau menginput pengaduan infrastruktur baru secara valid ke dalam sistem.
+  * **Isi Halaman:** Input judul/subjek masalah, deskripsi lengkap kerusakan, pilihan kecamatan, dan komponen unggah (*upload*) foto bukti fisik.
+  * **Fungsi:** Memfasilitasi warga mengirimkan pengaduan. Laporan yang baru dikirim dari halaman ini akan **otomatis berstatus *pending*** dan masuk ke ruang tunggu admin (belum tayang ke publik).
 
 * **Halaman 9: Edit Laporan (`/citizen/reports/{id}/edit`)**
   * **Isi Halaman:** Formulir pengisian laporan yang telah terisi data lama pengguna untuk direvisi kembali.
-  * **Fungsi:** Mengizinkan warga memperbaiki kesalahan input data atau memperbarui foto bukti selama status aduan tersebut masih berada dalam fase *Pending* (belum diproses oleh admin). Halaman ini hanya dapat diakses jika status laporan masih *Pending* — selain itu pengguna akan diarahkan kembali secara otomatis (*redirect*).
+  * **Fungsi:** Mengizinkan warga memperbaiki kesalahan input data atau memperbarui foto bukti. **Catatan Penting:** Halaman ini HANYA dapat diakses jika status laporan masih *Pending* (belum dipublikasi/diproses admin).
 
 ---
 
@@ -87,20 +93,20 @@ Rute di bawah proteksi keamanan *middleware* khusus warga (`role: citizen`):
 Rute di bawah proteksi keamanan ketat *middleware* khusus petugas (`role: admin`):
 
 * **Halaman 10: Admin Dashboard (`/admin/dashboard`)**
-  * **Isi Halaman:** Ringkasan total aduan global masuk, grafik tren statistik bulanan, dan matriks pemetaan wilayah kecamatan dengan tingkat urgensi keluhan tertinggi.
-  * **Fungsi:** Memberikan gambaran data makro bagi pengambil keputusan atau petugas instansi untuk melihat tren kerusakan fasilitas kota.
+  * **Isi Halaman:** Ringkasan total aduan global masuk, grafik tren statistik bulanan, dan matriks pemetaan wilayah kecamatan prioritas.
+  * **Fungsi:** Memberikan gambaran data makro bagi pengambil keputusan untuk melihat tren kerusakan fasilitas kota.
 
 * **Halaman 11: Kelola Wilayah (`/admin/districts`)**
-  * **Isi Halaman:** Tabel daftar seluruh kecamatan/wilayah administratif, dilengkapi tombol aksi tambah, edit, dan hapus data master.
-  * **Fungsi:** Mengelola data referensi lokasi resmi (CRUD Data Master) sebagai jangkar utama pilihan wilayah di seluruh rute aplikasi.
+  * **Isi Halaman:** Tabel daftar seluruh kecamatan/wilayah administratif, dilengkapi tombol aksi tambah, edit, dan hapus.
+  * **Fungsi:** Mengelola data referensi lokasi resmi (CRUD Data Master).
 
 * **Halaman 12: Manajemen Laporan (`/admin/reports`)**
-  * **Isi Halaman:** Tabel daftar **seluruh** laporan masuk dari masyarakat tanpa terkecuali — termasuk laporan yang belum diverifikasi (*pending*) yang tidak tampil di *Public Feed* — dilengkapi filter berdasarkan status, fitur pencarian cepat, dan tombol aksi verifikasi.
-  * **Fungsi:** Pusat kendali admin untuk menyaring, memeriksa, mengubah status, serta mengelola alur masuknya keluhan masyarakat secara sistematis. Berbeda dengan *Public Feed* yang hanya menampilkan laporan terverifikasi, halaman ini memberikan akses penuh ke seluruh data laporan.
+  * **Isi Halaman:** Tabel daftar **SELURUH** laporan masuk tanpa terkecuali. Admin bisa melihat laporan baru (*pending*) yang belum tayang, memantau laporan yang sedang tayang, hingga melihat laporan yang ditolak (*rejected*).
+  * **Fungsi:** Pos Patroli utama admin untuk melakukan validasi (*Quality Control*). Di sini admin bertugas menyeleksi laporan *pending* untuk diteruskan menjadi *published* (tayang ke publik) atau ditolak menjadi *rejected* (diblokir karena *spam*).
 
 * **Halaman 13: Detail + Input Progress Admin (`/admin/reports/{id}`)**
-  * **Isi Halaman:** Tampilan berkas laporan warga secara mendalam, tombol validasi (Terima/Tolak), formulir khusus untuk menginput teks catatan pembaruan progres pengerjaan di lapangan, serta linimasa seluruh catatan *progress update* yang pernah diinput sebelumnya.
-  * **Fungsi:** Tempat admin memvalidasi aduan secara mendalam sekaligus memperbarui lini masa penanganan masalah fisik agar bisa dipantau langsung oleh publik.
+  * **Isi Halaman:** Tampilan berkas laporan warga secara mendalam, tombol pengubah status (Publish/Kerjakan/Selesai/Tolak), serta formulir khusus untuk menginput teks catatan pembaruan progres pengerjaan di lapangan.
+  * **Fungsi:** Tempat admin memvalidasi aduan secara mendalam sekaligus memperbarui lini masa penanganan masalah fisik agar bisa dipantau langsung oleh masyarakat.
 
 ## 🗄️ Skema Database & Relasi
 

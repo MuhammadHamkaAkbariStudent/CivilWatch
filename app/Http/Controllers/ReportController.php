@@ -19,6 +19,7 @@ class ReportController extends Controller
     {
         // Mengambil laporan khusus milik user yang login, urutkan dari yang terbaru
         $reports = Report::where('user_id', Auth::id())
+                        ->with('district') // Eager loading untuk menghindari N+1 problem saat menampilkan nama kecamatan
                         ->orderBy('created_at', 'desc')
                         ->get();
 
@@ -156,16 +157,82 @@ class ReportController extends Controller
                          ->with('success', 'Laporan berhasil dihapus.');
     }
 
+
     /**
-     * Memperbarui status laporan (Khusus Admin)
+     * =====================================================================
+     * 🌍 AKSES PUBLIK - FEED & PENCARIAN
+     * =====================================================================
+     */
+
+    /**
+     * Menampilkan Public Feed (Halaman 5).
+     * Hanya menarik laporan yang sudah divalidasi admin (published, in_progress, resolved).
+     */
+    public function publicFeed(Request $request)
+    {
+        $query = Report::with(['user', 'district'])
+                       ->whereIn('status', [
+                           Report::STATUS_PUBLISHED, 
+                           Report::STATUS_IN_PROGRESS, 
+                           Report::STATUS_RESOLVED
+                       ])->withCount('upvotes');
+
+        // Logika pencarian judul laporan
+        if ($request->has('search') && $request->search != '') {
+            $query->where('title', 'ilike', '%' . $request->search . '%');
+        }
+
+        $reports = $query->latest()->paginate(12);
+
+        return view('feed', compact('reports'));
+    }
+
+
+    /**
+     * =====================================================================
+     * 📊 PANEL ADMIN - MANAJEMEN & VERIFIKASI
+     * =====================================================================
+     */
+
+    /**
+     * KHUSUS ADMIN: Menampilkan daftar SEMUA laporan untuk dipantau (Halaman 12).
+     */
+    public function adminIndex(Request $request)
+    {
+        // Menarik semua data tanpa filter status, termasuk yang masih 'pending'
+        $query = Report::with(['user', 'district']);
+
+        // Logika pencarian judul laporan di panel admin
+        if ($request->has('search') && $request->search != '') {
+            $query->where('title', 'ilike', '%' . $request->search . '%');
+        }
+
+        $reports = $query->latest()->paginate(15);
+        return view('admin.reports.index', compact('reports'));
+    }
+
+    /**
+     * KHUSUS ADMIN: Menampilkan detail laporan untuk verifikasi (Halaman 13).
+     */
+    public function adminShow(string $id)
+    {
+        // Mengambil data lengkap termasuk riwayat pengerjaan (progress updates)
+        $report = Report::with(['user', 'district', 'progressUpdates'])->findOrFail($id);
+        return view('admin.reports.show', compact('report'));
+    }
+
+    /**
+     * Memperbarui status laporan (Aksi Validasi Khusus Admin)
      */
     public function updateStatus(Request $request, string $id)
     {
+        // Validasi diperbarui untuk menerima status 'published'
         $validated = $request->validate([
-            'status' => 'required|in:pending,in_progress,resolved,rejected',
+            'status' => 'required|in:pending,published,in_progress,resolved,rejected',
         ]);
 
         $report = Report::findOrFail($id);
+        
         $report->update([
             'status' => $validated['status']
         ]);

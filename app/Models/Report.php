@@ -26,6 +26,7 @@ class Report extends Model
      * Gunakan konstanta ini di Controller untuk menghindari typo.
      */
     const STATUS_PENDING     = 'pending';
+    const STATUS_PUBLISHED   = 'published';
     const STATUS_IN_PROGRESS = 'in_progress';
     const STATUS_RESOLVED    = 'resolved';
     const STATUS_REJECTED    = 'rejected';
@@ -48,6 +49,7 @@ class Report extends Model
     public function isVerified(): bool
     {
         return in_array($this->status, [
+            self::STATUS_PUBLISHED,
             self::STATUS_IN_PROGRESS,
             self::STATUS_RESOLVED,
         ]);
