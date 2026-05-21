@@ -12,18 +12,16 @@ class UpdateReportRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true; // Ubah menjadi true
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'title'       => 'required|string|max:255',
+            'description' => 'required|string',
+            'district_id' => 'required|exists:districts,id',
+            'photo'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // nullable karena saat update opsional
         ];
     }
 }
