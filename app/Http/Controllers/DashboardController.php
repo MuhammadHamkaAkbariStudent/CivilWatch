@@ -39,7 +39,7 @@ class DashboardController extends Controller
         // Menggunakan DB::raw untuk mengekstrak bulan-tahun dari timestamp
         $monthlyTrend = Report::select(
                 DB::raw('count(id) as total'),
-                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month")
+                DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month")
             )
             ->groupBy('month')
             ->orderBy('month', 'desc')
