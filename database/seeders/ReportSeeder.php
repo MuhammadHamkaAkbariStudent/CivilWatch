@@ -59,7 +59,7 @@ class ReportSeeder extends Seeder
                 'created_at'  => now()->subDays(7),
                 'updated_at'  => now()->subDays(3),
             ],
-            // Status: pending — reported 3 days ago, awaiting admin verification
+            // Status: pending — reported 3 days ago, awaiting admin verification (Sembunyi dari Web)
             [
                 'title'       => 'Rambu Lalu Lintas Rusak dan Miring',
                 'description' => 'Rambu batas kecepatan di persimpangan jalan utama kondisinya rusak parah dan miring hampir roboh. Berpotensi membahayakan pengguna jalan jika sampai terjatuh.',
@@ -70,29 +70,29 @@ class ReportSeeder extends Seeder
                 'created_at'  => now()->subDays(3),
                 'updated_at'  => now()->subDays(3),
             ],
-            // Status: pending — reported 2 days ago, awaiting admin verification
+            // Status 'published' — Divalidasi Admin, sedang cari Upvote di Web
             [
                 'title'       => 'Trotoar Retak dan Tidak Rata',
                 'description' => 'Permukaan trotoar di sepanjang Jalan Diponegoro mengalami keretakan parah dan tidak rata. Kondisi ini sangat berbahaya bagi pejalan kaki, lansia, dan pengguna kursi roda.',
-                'status'      => 'pending',
+                'status'      => 'published',
                 'image'       => 'reports/dummy-trotoar.jpg',
                 'user_id'     => $citizens[0],
                 'district_id' => $districts[1],
                 'created_at'  => now()->subDays(2),
                 'updated_at'  => now()->subDays(2),
             ],
-            // Status: pending — reported 1 day ago, awaiting admin verification
+            // Status 'published' — Divalidasi Admin, sedang cari Upvote di Web
             [
                 'title'       => 'Tumpukan Sampah Liar di Pinggir Sungai',
                 'description' => 'Terdapat penumpukan sampah liar yang cukup besar di bantaran sungai dekat permukiman warga. Menimbulkan bau tidak sedap dan berpotensi mencemari aliran sungai.',
-                'status'      => 'pending',
+                'status'      => 'published',
                 'image'       => 'reports/dummy-sampah.jpg',
                 'user_id'     => $citizens[1],
                 'district_id' => $districts[4],
                 'created_at'  => now()->subDays(1),
                 'updated_at'  => now()->subDays(1),
             ],
-            // Status: rejected — reported 12 days ago, rejected by admin
+            // Status: rejected — reported 12 days ago, rejected by admin (Spam/Hoaks)
             [
                 'title'       => 'Cat Marka Jalan Sudah Pudar',
                 'description' => 'Marka jalan berupa garis putih di beberapa titik sudah sangat pudar dan hampir tidak terlihat. Membingungkan pengendara terutama saat kondisi hujan dan jalan basah.',

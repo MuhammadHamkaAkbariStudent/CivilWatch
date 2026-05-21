@@ -7,6 +7,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UpvoteController;
 use App\Http\Controllers\ProgressUpdateController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DistrictController;
 
 // =========================================================================
 // 🌍 1. AKSES PUBLIK & OTENTIKASI (Tanpa Login)
@@ -67,24 +68,6 @@ require __DIR__.'/auth.php';
 // =========================================================================
 // 👇 Menambahkan prefix URL '/citizen' dan prefix nama 'citizen.'
 Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')->group(function () {
-    
-    // Halaman 7: Citizen Dashboard (Cukup ketik '/dashboard', otomatis dibaca '/citizen/dashboard')
-    Route::get('/dashboard', function () {
-        return '
-            <h1 style="color: green; text-align: center; margin-top: 50px;">Ini Citizen Dashboard Khusus Warga 👨‍👩‍👧‍👦, Frontend silakan ganti dengan view.</h1>
-            <p style="text-align: center; font-family: sans-serif;">(Ruang kendali untuk melihat riwayat laporannya sendiri)</p>
-            
-            <div style="text-align: center; margin-top: 20px;">
-                <form method="POST" action="/logout">
-                    ' . csrf_field() . '
-                    <button type="submit" style="padding: 10px 20px; background-color: #ef4444; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        Log Out Warga 🚪
-                    </button>
-                </form>
-            </div>
-        ';
-    })->name('dashboard'); // 👈 Nama otomatis menjadi 'citizen.dashboard'
-
     // Tempat penulisan rute CRUD Laporan Warga (create, store, edit, update, destroy) oleh Backend Dev 2 nanti
     // Rute Dashboard kini diarahkan ke controller
     Route::get('/dashboard', [DashboardController::class, 'citizen'])->name('dashboard');
@@ -99,26 +82,22 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
 // =========================================================================
 // 👇 Menambahkan prefix URL '/admin' dan prefix nama 'admin.'
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    
-    // Halaman 10: Admin Dashboard (Cukup ketik '/dashboard', otomatis dibaca '/admin/dashboard')
-    Route::get('/dashboard', function () {
-        return '
-            <h1 style="color: blue; text-align: center; margin-top: 50px;">Ini Panel Admin CivilWatch 👮‍♂️, Frontend silakan ganti dengan view.</h1>
-            
-            <div style="text-align: center; margin-top: 20px;">
-                <form method="POST" action="/logout">
-                    ' . csrf_field() . '
-                    <button type="submit" style="padding: 10px 20px; background-color: #ef4444; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        Log Out Admin 🚪
-                    </button>
-                </form>
-            </div>
-        ';
-    })->name('dashboard'); // 👈 Nama otomatis menjadi 'admin.dashboard'
-
     // Tempat penulisan rute CRUD Kelola Wilayah (District) dan Manajemen Laporan Admin oleh Backend Dev 1 & 2 nanti
     // Rute Dashboard Admin kini diarahkan ke controller
     Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+
+    // Halaman 11: Kelola Wilayah (Admin)
+    Route::resource('districts', DistrictController::class)->except(['show']);
+
+    // Halaman 12: Manajemen Laporan (Admin)
+    Route::get('/reports', function () {
+        return '<h1>[DUMMY] Manajemen Laporan (Admin). Frontend silakan ganti dengan view.</h1>';
+    })->name('reports.index');
+
+    // Halaman 13: Detail Laporan + Input Progress (Admin)
+    Route::get('/reports/{id}', function ($id) {
+        return '<h1>[DUMMY] Detail Laporan Admin ID: ' . $id . '. Frontend silakan ganti dengan view.</h1>';
+    })->name('reports.show');
 
     // Rute Progress Update
     Route::post('/reports/{report_id}/progress', [ProgressUpdateController::class, 'store'])->name('reports.progress.store');
