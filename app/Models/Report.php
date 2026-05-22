@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute; // 💡 Tambahan untuk Accessor Modern
 
 class Report extends Model
 {
@@ -23,7 +24,6 @@ class Report extends Model
 
     /**
      * Daftar nilai valid untuk kolom status.
-     * Gunakan konstanta ini di Controller untuk menghindari typo.
      */
     const STATUS_PENDING     = 'pending';
     const STATUS_PUBLISHED   = 'published';
@@ -55,12 +55,32 @@ class Report extends Model
         ]);
     }
 
+    // =========================================================
+    // ACCESSOR (Gaya Modern Laravel 13)
+    // =========================================================
+
     /**
      * Ambil URL lengkap foto bukti dari storage.
+     * Akses di Blade: $report->image_url
      */
-    public function getImageUrlAttribute(): ?string
+    protected function imageUrl(): Attribute
     {
-        return $this->image ? asset('storage/' . $this->image) : null;
+        return Attribute::make(
+            get: fn () => $this->image ? asset('storage/' . $this->image) : null,
+        );
+    }
+
+    /**
+     * Mengambil total upvote secara aman dan efisien.
+     * Akses di Blade: $report->upvote_count
+     */
+    protected function upvoteCount(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->attributes['upvotes_count'] ?? $this->upvotes()->count(),
+            // 💡 Penjelasan: Jika di Controller menggunakan withCount('upvotes'), 
+            // Ambil data yang sudah ada tanpa query ulang. Jika tidak, baru jalankan count().
+        );
     }
 
     // =========================================================
@@ -85,7 +105,6 @@ class Report extends Model
 
     /**
      * One-to-Many: Laporan ini bisa memiliki banyak catatan progres.
-     * Diurutkan dari yang terlama agar tampil sebagai linimasa kronologis.
      */
     public function progressUpdates()
     {
@@ -94,20 +113,10 @@ class Report extends Model
 
     /**
      * Many-to-Many: User-user yang telah memberikan upvote pada laporan ini.
-     * Menggunakan tabel pivot: upvotes
      */
     public function upvotes()
     {
         return $this->belongsToMany(User::class, 'upvotes')
                     ->withTimestamps();
-    }
-
-    /**
-     * Hitung total upvote laporan ini (lebih efisien dari count() langsung).
-     * Gunakan withCount('upvotes') di Controller untuk menghindari query N+1.
-     */
-    public function getUpvoteCountAttribute(): int
-    {
-        return $this->upvotes()->count();
     }
 }

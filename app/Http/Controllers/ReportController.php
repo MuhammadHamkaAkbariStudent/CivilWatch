@@ -8,18 +8,24 @@ use App\Http\Requests\StoreReportRequest;
 use App\Http\Requests\UpdateReportRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
     /**
-     * Menampilkan daftar laporan milik warga yang sedang login.
+     * =====================================================================
+     * 👤 PANEL WARGA (CITIZEN WORKSPACE)
+     * =====================================================================
+     */
+
+    /**
+     * Menampilkan daftar laporan milik warga yang sedang login (Halaman 7).
      */
     public function index()
     {
-        // Mengambil laporan khusus milik user yang login, urutkan dari yang terbaru
         $reports = Report::where('user_id', Auth::id())
-                        ->with('district') // Eager loading untuk menghindari N+1 problem saat menampilkan nama kecamatan
+                        ->with('district') 
                         ->orderBy('created_at', 'desc')
                         ->get();
 
@@ -27,34 +33,34 @@ class ReportController extends Controller
     }
 
     /**
-     * Menampilkan form pembuatan laporan baru.
+     * Menampilkan form pembuatan laporan baru (Halaman 8).
      */
     public function create()
     {
-        // Mengambil data kecamatan untuk dropdown form
         $districts = District::all();
-        
         return view('citizen.reports.create', compact('districts'));
     }
 
     /**
-     * Menyimpan data laporan baru ke database.
+     * Menyimpan data laporan baru ke database (Mengamankan aset foto nullable).
      */
     public function store(StoreReportRequest $request)
     {
         $validated = $request->validated();
 
-        // Proses upload file foto
-        // File akan disimpan di folder 'storage/app/public/reports'
-        $imagePath = $request->file('photo')->store('reports', 'public');
+        // Antisipasi jika foto tidak diunggah / bersifat opsional 👈 Perbaikan Revisi 3
+        $imagePath = null;
+        if ($request->hasFile('photo')) {
+            $imagePath = $request->file('photo')->store('reports', 'public');
+        }
 
         Report::create([
             'user_id'     => Auth::id(),
             'district_id' => $validated['district_id'],
             'title'       => $validated['title'],
             'description' => $validated['description'],
-            'image'       => $imagePath,
-            'status'      => Report::STATUS_PENDING,
+            'image'       => $imagePath, 
+            'status'      => Report::STATUS_PENDING, 
         ]);
 
         return redirect()->route('citizen.dashboard')
@@ -62,13 +68,12 @@ class ReportController extends Controller
     }
 
     /**
-     * Menampilkan detail spesifik laporan.
+     * Menampilkan detail spesifik laporan internal milik warga bersangkutan.
      */
     public function show(string $id)
     {
-        $report = Report::findOrFail($id);
+        $report = Report::with('district')->findOrFail($id);
 
-        // Otorisasi: Pastikan laporan ini milik user yang sedang login
         if ($report->user_id !== Auth::id()) {
             abort(403, 'Anda tidak memiliki akses ke laporan ini.');
         }
@@ -77,50 +82,37 @@ class ReportController extends Controller
     }
 
     /**
-     * Menampilkan form edit laporan.
+     * Menampilkan form edit laporan (Menggunakan Otorisasi Policy).
      */
     public function edit(string $id)
     {
         $report = Report::findOrFail($id);
 
-        if ($report->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak memiliki akses untuk mengedit laporan ini.');
-        }
-
-        // Mengecek status menggunakan helper dari Model
-        if (!$report->isEditable()) {
-            return redirect()->route('citizen.reports.index')
-                             ->with('error', 'Laporan yang sudah diproses tidak dapat diedit.');
-        }
+        // Memanggil Satpam Policy untuk cek kepemilikan & status pending sekaligus 👈 Perbaikan Revisi 1
+        Gate::authorize('update', $report);
 
         $districts = District::all();
-
         return view('citizen.reports.edit', compact('report', 'districts'));
     }
 
     /**
-     * Memperbarui data laporan di database.
+     * Memperbarui data laporan di database (Menggunakan Otorisasi Policy).
      */
     public function update(UpdateReportRequest $request, string $id)
     {
         $report = Report::findOrFail($id);
 
-        if ($report->user_id !== Auth::id() || !$report->isEditable()) {
-            abort(403, 'Tindakan tidak diizinkan.');
-        }
+        // Proteksi mutlak lewat Policy 👈 Perbaikan Revisi 1
+        Gate::authorize('update', $report);
 
         $validated = $request->validated();
 
-        // Jika user mengunggah foto baru saat update
         if ($request->hasFile('photo')) {
-            // Hapus foto lama dari storage
             if ($report->image) {
                 Storage::disk('public')->delete($report->image);
             }
-            // Simpan foto baru
             $validated['image'] = $request->file('photo')->store('reports', 'public');
         } else {
-            // Pertahankan path gambar lama jika tidak ada upload baru
             $validated['image'] = $report->image;
         }
 
@@ -136,17 +128,15 @@ class ReportController extends Controller
     }
 
     /**
-     * Menghapus laporan beserta aset fotonya.
+     * Menghapus laporan beserta aset fotonya (Menggunakan Otorisasi Policy).
      */
     public function destroy(string $id)
     {
         $report = Report::findOrFail($id);
 
-        if ($report->user_id !== Auth::id() || !$report->isEditable()) {
-            abort(403, 'Laporan tidak dapat dihapus.');
-        }
+        // Proteksi mutlak lewat Policy sebelum eksekusi hapus file 👈 Perbaikan Revisi 1
+        Gate::authorize('delete', $report);
 
-        // Hapus file fisik gambar dari server sebelum menghapus record database
         if ($report->image) {
             Storage::disk('public')->delete($report->image);
         }
@@ -160,13 +150,12 @@ class ReportController extends Controller
 
     /**
      * =====================================================================
-     * 🌍 AKSES PUBLIK - FEED & PENCARIAN
+     * 🌍 AKSES PUBLIK (PENGUNJUNG UMUM)
      * =====================================================================
      */
 
     /**
-     * Menampilkan Public Feed (Halaman 5).
-     * Hanya menarik laporan yang sudah divalidasi admin (published, in_progress, resolved).
+     * Menampilkan Public Feed dengan sistem Filter Kecamatan dan Search (Halaman 5).
      */
     public function publicFeed(Request $request)
     {
@@ -177,34 +166,54 @@ class ReportController extends Controller
                            Report::STATUS_RESOLVED
                        ])->withCount('upvotes');
 
-        // Logika pencarian judul laporan
         if ($request->has('search') && $request->search != '') {
             $query->where('title', 'ilike', '%' . $request->search . '%');
         }
 
-        $reports = $query->latest()->paginate(12);
+        if ($request->has('district_id') && $request->district_id != '') {
+            $query->where('district_id', $request->district_id);
+        }
 
-        return view('feed', compact('reports'));
+        $reports = $query->latest()->paginate(12);
+        $districts = District::all(); 
+
+        return view('feed', compact('reports', 'districts'));
+    }
+
+    /**
+     * Menampilkan rincian aduan terbuka untuk publik (Halaman 6).
+     */
+    public function publicShow(string $id)
+    {
+        $report = Report::with(['user', 'district', 'progressUpdates'])
+                        ->withCount('upvotes')
+                        ->findOrFail($id);
+
+        return view('reports.show', compact('report'));
     }
 
 
     /**
      * =====================================================================
-     * 📊 PANEL ADMIN - MANAJEMEN & VERIFIKASI
+     * 📊 PANEL ADMIN (ADMIN CONTROL PANEL)
      * =====================================================================
      */
 
     /**
-     * KHUSUS ADMIN: Menampilkan daftar SEMUA laporan untuk dipantau (Halaman 12).
+     * KHUSUS ADMIN: Menampilkan daftar semua laporan + Fitur Filter Status (Halaman 12).
      */
     public function adminIndex(Request $request)
     {
-        // Menarik semua data tanpa filter status, termasuk yang masih 'pending'
         $query = Report::with(['user', 'district']);
 
-        // Logika pencarian judul laporan di panel admin
+        // Filter 1: Berdasarkan Pencarian Teks Kata Kunci
         if ($request->has('search') && $request->search != '') {
             $query->where('title', 'ilike', '%' . $request->search . '%');
+        }
+
+        // Filter 2: Berdasarkan Dropdown Kategori Status (Pending/Published/dll) 👈 Perbaikan Revisi 2
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
         }
 
         $reports = $query->latest()->paginate(15);
@@ -212,21 +221,23 @@ class ReportController extends Controller
     }
 
     /**
-     * KHUSUS ADMIN: Menampilkan detail laporan untuk verifikasi (Halaman 13).
+     * KHUSUS ADMIN: Layar pemeriksaan mendalam + Penghitung Total Dukungan (Halaman 13).
      */
     public function adminShow(string $id)
     {
-        // Mengambil data lengkap termasuk riwayat pengerjaan (progress updates)
-        $report = Report::with(['user', 'district', 'progressUpdates'])->findOrFail($id);
+        // Menambahkan hitungan upvote agar admin tahu tingkat kedaruratan laporan 👈 Perbaikan Revisi 4
+        $report = Report::with(['user', 'district', 'progressUpdates'])
+                        ->withCount('upvotes') 
+                        ->findOrFail($id);
+
         return view('admin.reports.show', compact('report'));
     }
 
     /**
-     * Memperbarui status laporan (Aksi Validasi Khusus Admin)
+     * Aksi Eksekusi Validasi Status oleh Admin.
      */
     public function updateStatus(Request $request, string $id)
     {
-        // Validasi diperbarui untuk menerima status 'published'
         $validated = $request->validate([
             'status' => 'required|in:pending,published,in_progress,resolved,rejected',
         ]);
