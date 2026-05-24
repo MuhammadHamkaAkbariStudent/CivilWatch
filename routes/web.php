@@ -37,8 +37,9 @@ Route::get('/feed', function (Request $request) {
 })->name('feed');// 👈 Penamaan rute ditambahkan
 
 // Halaman 6: Detail Laporan Publik
-Route::get('/reports/{id}', function ($id) {
-    return '<h1>[DUMMY] Detail Laporan ID: ' . $id . '. Frontend silakan ganti dengan view.</h1>';
+Route::get('/reports/{report}', function (Report $report) {
+    $report->load(['user', 'district', 'progressUpdates']);
+    return view('reports.show', compact('report'));
 })->name('reports.show'); // 👈 Penamaan rute ditambahkan
 
 
@@ -51,8 +52,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // Tempat penulisan rute POST Upvote (Many-to-Many) oleh Backend Dev 2 nanti
-    // Route::post('/reports/{id}/upvote', ...)->name('reports.upvote');
+    Route::post('/reports/{id}/upvote', function ($id) {
+        $user = auth()->user();
+        $user->upvotedReports()->toggle($id);
+        return redirect()->back();
+    })->name('reports.upvote');
 });
 
 require __DIR__.'/auth.php';
