@@ -167,9 +167,8 @@
                     </div>
                 </div>
                 <p class="text-xs text-center">© {{ date('Y') }} CivilWatch — Dibuat untuk transparansi dan partisipasi warga Kota Banjarmasin</p>
-                <div class="flex gap-4 text-xs">
-                    <a href="{{ route('feed') }}" class="hover:text-white transition">Laporan Publik</a>
-                    <a href="{{ route('login') }}" class="hover:text-white transition">Masuk</a>
+                <div class="flex gap-4 text-s">
+                    <p>Kontak: info@civilwatch.id</p>
                 </div>
             </div>
         </div>

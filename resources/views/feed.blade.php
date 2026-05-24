@@ -84,7 +84,6 @@
                         $sc = $statusConfig[$report->status] ?? ['label' => $report->status, 'class' => 'bg-slate-100 text-slate-700', 'dot' => 'bg-slate-400'];
                     @endphp
                     <a href="{{ route('reports.show', $report->id) }}" class="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 overflow-hidden flex flex-col">
-                        //Image Section
                         <div class="h-44 bg-slate-100 overflow-hidden">
                             @if($report->image)
                                 <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
