@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
         User::create([
             'name'     => 'Admin CivilWatch',
             'email'    => 'admin@civilwatch.id',
-            'password' => Hash::make('password'),
+            'password' => 'password',
             'role'     => 'admin',
         ]);
 
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
             User::create([
                 'name'     => $citizen['name'],
                 'email'    => $citizen['email'],
-                'password' => Hash::make('password'),
+                'password' => 'password',
                 'role'     => 'citizen',
             ]);
         }
