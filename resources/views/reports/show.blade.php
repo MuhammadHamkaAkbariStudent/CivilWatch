@@ -132,7 +132,7 @@
                     </div>
                 </div>
 
-                <a href="{{ route('feed') }}" class="bg-[--cw-navy] flex items-center justify-center gap-2 w-full py-3 border border-slate-200 text-white text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50 transition-all">
+                <a href="{{ route('feed') }}" class="bg-[--cw-navy] flex items-center justify-center gap-2 w-full py-3 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     Kembali ke Daftar
                 </a>
