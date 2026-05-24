@@ -13,28 +13,25 @@ Route::get('/', function () {
 })->name('home'); // 👈 Penamaan rute ditambahkan
 
 // Halaman 5: Public Feed
-Route::get('/feed', function () {
-    // Mengecek status menggunakan satu baris ringkas (Ternary Operator)
-    $status = Auth::check() 
-        ? '<p style="color: blue;">(Halo, kamu sedang login sebagai: ' . Auth::user()->role . ')</p>' 
-        : '<p style="color: gray;">(Kamu sedang melihat halaman ini sebagai Pengunjung Publik / Belum Login).</p>';
-    
-    $tampilan = '<h1>[DUMMY] Ini Public Feed Warga. Frontend silakan ganti dengan view.</h1>' . $status;
+Route::get('/feed', function (Request $request) {
 
-    // Tombol logout HANYA muncul jika ada yang login
-    if (Auth::check()) {
-        $tampilan .= '
-            <form method="POST" action="/logout">
-                ' . csrf_field() . '
-                <button type="submit" style="padding: 10px 20px; background-color: #ef4444; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    Test Log Out 🚪
-                </button>
-            </form>
-        ';
+    $districts = District::orderBy('name', 'asc')->get();
+
+    $query = Report::with(['user', 'district'])->latest();
+
+    if ($request->filled('search')) {
+        $searchTerm = strtolower($request->search); 
+        $query->whereRaw('LOWER(title) LIKE ?', ['%' . $searchTerm . '%']);
     }
 
-    return $tampilan;
-})->name('feed'); // 👈 Penamaan rute ditambahkan
+    if ($request->filled('district_id')) {
+        $query->where('district_id', $request->district_id);
+    }
+
+    $reports = $query->paginate(9);
+
+    return view('feed', compact('reports', 'districts'));
+})->name('feed');// 👈 Penamaan rute ditambahkan
 
 // Halaman 6: Detail Laporan Publik
 Route::get('/reports/{id}', function ($id) {
@@ -80,6 +77,10 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
             </div>
         ';
     })->name('dashboard'); // 👈 Nama otomatis menjadi 'citizen.dashboard'
+
+    Route::get('/reports/create', function () {
+        return '<h1>[DUMMY] Halaman Form Buat Laporan Baru. Frontend silakan ganti dengan view.</h1>';
+    })->name('reports.create');
 
     // Tempat penulisan rute CRUD Laporan Warga (create, store, edit, update, destroy) oleh Backend Dev 2 nanti
 });
