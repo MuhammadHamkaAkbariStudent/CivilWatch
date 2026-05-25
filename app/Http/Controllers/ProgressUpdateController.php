@@ -16,13 +16,21 @@ class ProgressUpdateController extends Controller
         // 1. Validasi input dari Admin
         $validated = $request->validate([
             'note'   => 'required|string|min:5',
-            'status' => 'required|in:pending,published,in_progress,resolved,rejected',
+            'status' => 'required|in:published,in_progress,resolved',
         ]);
 
         // 2. Cari laporan berdasarkan ID yang ada di URL
         $report = Report::findOrFail($report_id);
 
-        $lockedStatuses = ['resolved', 'rejected'];
+        if ($report->status === Report::STATUS_PENDING) {
+            return back()->with('error', 'Laporan belum diverifikasi dan tidak dapat diberi progres.');
+        }
+
+        $lockedStatuses = [
+            Report::STATUS_RESOLVED,
+            Report::STATUS_REJECTED,
+        ];
+
         if (in_array($report->status, $lockedStatuses)) {
             return back()->with('error', 'Laporan yang sudah selesai atau ditolak tidak dapat diubah statusnya.');
         }
