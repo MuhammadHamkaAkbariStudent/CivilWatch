@@ -16,7 +16,7 @@ class ProgressUpdateController extends Controller
         // 1. Validasi input dari Admin
         $validated = $request->validate([
             'note'   => 'required|string|min:5',
-            'status' => 'required|in:pending,in_progress,resolved,rejected',
+            'status' => 'required|in:pending,published,in_progress,resolved,rejected',
         ]);
 
         // 2. Cari laporan berdasarkan ID yang ada di URL
