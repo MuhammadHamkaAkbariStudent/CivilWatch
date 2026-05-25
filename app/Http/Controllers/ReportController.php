@@ -25,9 +25,9 @@ class ReportController extends Controller
     public function index()
     {
         $reports = Report::where('user_id', Auth::id())
-                        ->with('district') 
-                        ->orderBy('created_at', 'desc')
-                        ->get();
+            ->with('district')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('citizen.reports.index', compact('reports'));
     }
@@ -59,12 +59,12 @@ class ReportController extends Controller
             'district_id' => $validated['district_id'],
             'title'       => $validated['title'],
             'description' => $validated['description'],
-            'image'       => $imagePath, 
-            'status'      => Report::STATUS_PENDING, 
+            'image'       => $imagePath,
+            'status'      => Report::STATUS_PENDING,
         ]);
 
         return redirect()->route('citizen.dashboard')
-                         ->with('success', 'Laporan berhasil dibuat dan sedang menunggu verifikasi.');
+            ->with('success', 'Laporan berhasil dibuat dan sedang menunggu verifikasi.');
     }
 
     /**
@@ -74,9 +74,8 @@ class ReportController extends Controller
     {
         $report = Report::with('district')->findOrFail($id);
 
-        if ($report->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak memiliki akses ke laporan ini.');
-        }
+        // Mengganti pengecekan manual dengan Policy Gate demi konsistensi kode 💻
+        Gate::authorize('view', $report);
 
         return view('citizen.reports.show', compact('report'));
     }
@@ -124,7 +123,7 @@ class ReportController extends Controller
         ]);
 
         return redirect()->route('citizen.reports.show', $report->id)
-                         ->with('success', 'Laporan berhasil diperbarui.');
+            ->with('success', 'Laporan berhasil diperbarui.');
     }
 
     /**
@@ -144,7 +143,7 @@ class ReportController extends Controller
         $report->delete();
 
         return redirect()->route('citizen.reports.index')
-                         ->with('success', 'Laporan berhasil dihapus.');
+            ->with('success', 'Laporan berhasil dihapus.');
     }
 
 
@@ -160,11 +159,11 @@ class ReportController extends Controller
     public function publicFeed(Request $request)
     {
         $query = Report::with(['user', 'district'])
-                       ->whereIn('status', [
-                           Report::STATUS_PUBLISHED, 
-                           Report::STATUS_IN_PROGRESS, 
-                           Report::STATUS_RESOLVED
-                       ])->withCount('upvotes');
+            ->whereIn('status', [
+                Report::STATUS_PUBLISHED,
+                Report::STATUS_IN_PROGRESS,
+                Report::STATUS_RESOLVED
+            ])->withCount('upvotes');
 
         if ($request->has('search') && $request->search != '') {
             $query->where('title', 'ilike', '%' . $request->search . '%');
@@ -175,7 +174,7 @@ class ReportController extends Controller
         }
 
         $reports = $query->latest()->paginate(12);
-        $districts = District::all(); 
+        $districts = District::all();
 
         return view('feed', compact('reports', 'districts'));
     }
@@ -186,8 +185,8 @@ class ReportController extends Controller
     public function publicShow(string $id)
     {
         $report = Report::with(['user', 'district', 'progressUpdates'])
-                        ->withCount('upvotes')
-                        ->findOrFail($id);
+            ->withCount('upvotes')
+            ->findOrFail($id);
 
         return view('reports.show', compact('report'));
     }
@@ -227,8 +226,8 @@ class ReportController extends Controller
     {
         // Menambahkan hitungan upvote agar admin tahu tingkat kedaruratan laporan 👈 Perbaikan Revisi 4
         $report = Report::with(['user', 'district', 'progressUpdates'])
-                        ->withCount('upvotes') 
-                        ->findOrFail($id);
+            ->withCount('upvotes')
+            ->findOrFail($id);
 
         return view('admin.reports.show', compact('report'));
     }
@@ -243,7 +242,7 @@ class ReportController extends Controller
         ]);
 
         $report = Report::findOrFail($id);
-        
+
         $report->update([
             'status' => $validated['status']
         ]);
