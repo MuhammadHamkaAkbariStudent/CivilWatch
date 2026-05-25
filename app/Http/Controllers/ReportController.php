@@ -41,18 +41,12 @@ class ReportController extends Controller
         return view('citizen.reports.create', compact('districts'));
     }
 
-    /**
-     * Menyimpan data laporan baru ke database (Mengamankan aset foto nullable).
-     */
     public function store(StoreReportRequest $request)
     {
         $validated = $request->validated();
 
-        // Antisipasi jika foto tidak diunggah / bersifat opsional 👈 Perbaikan Revisi 3
-        $imagePath = null;
-        if ($request->hasFile('photo')) {
-            $imagePath = $request->file('photo')->store('reports', 'public');
-        }
+        // Foto wajib sebagai bukti laporan
+        $imagePath = $request->file('photo')->store('reports', 'public');
 
         Report::create([
             'user_id'     => Auth::id(),
@@ -184,8 +178,15 @@ class ReportController extends Controller
      */
     public function publicShow(string $id)
     {
+        $allowedStatuses = [
+            Report::STATUS_PUBLISHED,
+            Report::STATUS_IN_PROGRESS,
+            Report::STATUS_RESOLVED,
+        ];
+
         $report = Report::with(['user', 'district', 'progressUpdates'])
             ->withCount('upvotes')
+            ->whereIn('status', $allowedStatuses)
             ->findOrFail($id);
 
         return view('reports.show', compact('report'));
@@ -242,6 +243,16 @@ class ReportController extends Controller
         ]);
 
         $report = Report::findOrFail($id);
+
+        $lockedStatuses = ['resolved', 'rejected'];
+
+        if (in_array($report->status, $lockedStatuses)) {
+            return back()->with('error', 'Laporan yang sudah selesai atau ditolak tidak dapat diubah statusnya.');
+        }
+
+        if ($report->status === $validated['status']) {
+            return back()->with('error', 'Status tidak berubah.');
+        }
 
         $report->update([
             'status' => $validated['status']
