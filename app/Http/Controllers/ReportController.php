@@ -21,15 +21,11 @@ class ReportController extends Controller
 
     /**
      * Menampilkan daftar laporan milik warga yang sedang login (Halaman 7).
+     * Dialihkan ke Dashboard Warga demi efisiensi dan keselarasan UI.
      */
     public function index()
     {
-        $reports = Report::where('user_id', Auth::id())
-            ->with('district')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return view('citizen.reports.index', compact('reports'));
+        return redirect()->route('citizen.dashboard');
     }
 
     /**
@@ -41,20 +37,26 @@ class ReportController extends Controller
         return view('citizen.reports.create', compact('districts'));
     }
 
+    /**
+     * Menyimpan data laporan baru ke database (Mengamankan aset foto nullable).
+     */
     public function store(StoreReportRequest $request)
     {
         $validated = $request->validated();
 
-        // Foto wajib sebagai bukti laporan
-        $imagePath = $request->file('photo')->store('reports', 'public');
+        // Antisipasi jika foto tidak diunggah / bersifat opsional 👈 Perbaikan Revisi 3
+        $imagePath = null;
+        if ($request->hasFile('photo')) {
+            $imagePath = $request->file('photo')->store('reports', 'public');
+        }
 
         Report::create([
-            'user_id'     => Auth::id(),
+            'user_id' => Auth::id(),
             'district_id' => $validated['district_id'],
-            'title'       => $validated['title'],
+            'title' => $validated['title'],
             'description' => $validated['description'],
-            'image'       => $imagePath,
-            'status'      => Report::STATUS_PENDING,
+            'image' => $imagePath,
+            'status' => Report::STATUS_PENDING,
         ]);
 
         return redirect()->route('citizen.dashboard')
@@ -63,15 +65,17 @@ class ReportController extends Controller
 
     /**
      * Menampilkan detail spesifik laporan internal milik warga bersangkutan.
+     * Dialihkan ke detail publik agar terintegrasi dengan data riwayat linimasa yang kaya.
      */
     public function show(string $id)
     {
-        $report = Report::with('district')->findOrFail($id);
+        $report = Report::findOrFail($id);
 
-        // Mengganti pengecekan manual dengan Policy Gate demi konsistensi kode 💻
-        Gate::authorize('view', $report);
+        if ($report->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki akses ke laporan ini.');
+        }
 
-        return view('citizen.reports.show', compact('report'));
+        return redirect()->route('reports.show', $report->id);
     }
 
     /**
@@ -111,12 +115,12 @@ class ReportController extends Controller
 
         $report->update([
             'district_id' => $validated['district_id'],
-            'title'       => $validated['title'],
+            'title' => $validated['title'],
             'description' => $validated['description'],
-            'image'       => $validated['image'],
+            'image' => $validated['image'],
         ]);
 
-        return redirect()->route('citizen.reports.show', $report->id)
+        return redirect()->route('citizen.dashboard')
             ->with('success', 'Laporan berhasil diperbarui.');
     }
 
@@ -136,7 +140,7 @@ class ReportController extends Controller
 
         $report->delete();
 
-        return redirect()->route('citizen.reports.index')
+        return redirect()->route('citizen.dashboard')
             ->with('success', 'Laporan berhasil dihapus.');
     }
 
@@ -152,6 +156,11 @@ class ReportController extends Controller
      */
     public function publicFeed(Request $request)
     {
+        // Admin tidak memiliki akses ke halaman publik, langsung redirect ke dashboard admin
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
         $query = Report::with(['user', 'district'])
             ->whereIn('status', [
                 Report::STATUS_PUBLISHED,
@@ -178,15 +187,18 @@ class ReportController extends Controller
      */
     public function publicShow(string $id)
     {
-        $allowedStatuses = [
-            Report::STATUS_PUBLISHED,
-            Report::STATUS_IN_PROGRESS,
-            Report::STATUS_RESOLVED,
-        ];
+        // Admin langsung ke halaman detail admin, bukan halaman publik
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return redirect()->route('admin.reports.show', $id);
+        }
 
         $report = Report::with(['user', 'district', 'progressUpdates'])
             ->withCount('upvotes')
-            ->whereIn('status', $allowedStatuses)
+            ->whereIn('status', [
+                Report::STATUS_PUBLISHED,
+                Report::STATUS_IN_PROGRESS,
+                Report::STATUS_RESOLVED,
+            ])
             ->findOrFail($id);
 
         return view('reports.show', compact('report'));
@@ -204,7 +216,7 @@ class ReportController extends Controller
      */
     public function adminIndex(Request $request)
     {
-        $query = Report::with(['user', 'district']);
+        $query = Report::with(['user', 'district'])->withCount('upvotes');
 
         // Filter 1: Berdasarkan Pencarian Teks Kata Kunci
         if ($request->has('search') && $request->search != '') {
@@ -216,8 +228,22 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $reports = $query->latest()->paginate(15);
-        return view('admin.reports.index', compact('reports'));
+        // Filter 3: Berdasarkan Dropdown Wilayah/Kecamatan 👈 Perbaikan Baru
+        if ($request->has('district_id') && $request->district_id != '') {
+            $query->where('district_id', $request->district_id);
+        }
+
+        // Filter 4: Urutan berdasarkan Upvote Terbanyak (Prioritas) vs Terbaru
+        if ($request->has('sort_by') && $request->sort_by === 'upvotes') {
+            $query->orderBy('upvotes_count', 'desc');
+        } else {
+            $query->latest();
+        }
+
+        $reports = $query->paginate(15);
+        $districts = District::orderBy('name', 'asc')->get();
+
+        return view('admin.reports.index', compact('reports', 'districts'));
     }
 
     /**
@@ -244,20 +270,32 @@ class ReportController extends Controller
 
         $report = Report::findOrFail($id);
 
-        $lockedStatuses = ['resolved', 'rejected'];
-
-        if (in_array($report->status, $lockedStatuses)) {
-            return back()->with('error', 'Laporan yang sudah selesai atau ditolak tidak dapat diubah statusnya.');
-        }
-
-        if ($report->status === $validated['status']) {
-            return back()->with('error', 'Status tidak berubah.');
-        }
-
         $report->update([
             'status' => $validated['status']
         ]);
 
         return back()->with('success', 'Status laporan berhasil diverifikasi menjadi: ' . $validated['status']);
+    }
+
+    /**
+     * KHUSUS ADMIN: Menghapus laporan milik warga beserta aset foto dan data terkait.
+     * Admin berwenang menghapus laporan apa pun, tanpa batasan status.
+     */
+    public function adminDestroy(string $id)
+    {
+        $report = Report::findOrFail($id);
+
+        // Hapus foto bukti dari storage jika ada
+        if ($report->image) {
+            Storage::disk('public')->delete($report->image);
+        }
+
+        // Hapus relasi terkait (upvotes & progress_updates) lalu hapus laporan
+        $report->upvotes()->detach();
+        $report->progressUpdates()->delete();
+        $report->delete();
+
+        return redirect()->route('admin.reports.index')
+            ->with('success', 'Laporan "' . $report->title . '" berhasil dihapus secara permanen.');
     }
 }
