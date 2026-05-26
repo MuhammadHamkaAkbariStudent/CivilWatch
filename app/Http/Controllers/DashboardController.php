@@ -27,7 +27,28 @@ class DashboardController extends Controller
             ->where('status', Report::STATUS_RESOLVED)
             ->count();
 
-        return view('citizen.dashboard', compact('myTotal', 'myPending', 'myResolved'));
+        // Ambil 5 laporan terbaru milik user
+        $recentReports = Report::where('user_id', $userId)
+            ->with('district')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $user = \App\Models\User::findOrFail(Auth::id());
+
+        $upvotedReports = $user->upvotedReports()
+            ->with('district')
+            ->orderByPivot('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        return view('citizen.dashboard', compact(
+            'myTotal',
+            'myPending',
+            'myResolved',
+            'recentReports',
+            'upvotedReports'
+        ));
     }
 
     /**
