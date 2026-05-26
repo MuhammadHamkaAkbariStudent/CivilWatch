@@ -14,7 +14,12 @@ class UpvoteController extends Controller
     {
         // Cari laporan berdasarkan ID
         $report = Report::findOrFail($id);
-        
+
+        // Proteksi: hanya laporan yang sudah terverifikasi/published yang boleh di-upvote
+        if (! $report->isVerified()) {
+            abort(403, 'Laporan ini belum bisa di-upvote.');
+        }
+
         // Ambil user yang sedang login
         $user = Auth::user();
 
