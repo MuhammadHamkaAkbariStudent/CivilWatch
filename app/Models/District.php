@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class District extends Model
 {
@@ -12,16 +12,14 @@ class District extends Model
     /**
      * Kolom yang boleh diisi secara massal.
      */
-    protected $fillable = [
-        'name',
-    ];
+    protected $fillable = ['name'];
 
     // =========================================================
     // RELASI
     // =========================================================
 
     /**
-     * One-to-Many: Satu wilayah bisa memiliki banyak laporan.
+     * One-to-Many: Satu kecamatan memiliki banyak laporan.
      */
     public function reports()
     {

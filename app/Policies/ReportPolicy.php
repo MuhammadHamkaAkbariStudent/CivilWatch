@@ -8,14 +8,6 @@ use App\Models\User;
 class ReportPolicy
 {
     /**
-     * View: hanya pemilik laporan yang boleh melihat detail laporan pribadinya.
-     */
-    public function view(User $user, Report $report): bool
-    {
-        return $user->id === $report->user_id;
-    }
-    
-    /**
      * Edit: hanya pemilik laporan DAN status masih pending.
      */
     public function update(User $user, Report $report): bool
