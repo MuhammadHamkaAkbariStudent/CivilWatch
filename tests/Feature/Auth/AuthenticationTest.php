@@ -17,7 +17,7 @@ test('users can authenticate using the login screen', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('citizen.dashboard', absolute: false));
 });
 
 test('users can not authenticate with invalid password', function () {
@@ -38,4 +38,20 @@ test('users can logout', function () {
 
     $this->assertGuest();
     $response->assertRedirect('/');
+});
+
+test('admin users are redirected to admin dashboard after login', function () {
+    // Buat user dengan role khusus admin (menimpa default factory)
+    $admin = User::factory()->create([
+        'role' => 'admin',
+    ]);
+
+    $response = $this->post('/login', [
+        'email' => $admin->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticated();
+    // Pastikan admin otomatis terlempar ke rute panel kontrolnya
+    $response->assertRedirect(route('admin.dashboard', absolute: false));
 });

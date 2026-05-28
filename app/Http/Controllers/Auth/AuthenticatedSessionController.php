@@ -24,28 +24,30 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-    $request->authenticate();
-    $request->session()->regenerate();
+        $request->authenticate();
 
-    // Redirect otomatis berdasarkan role
-    if (request()->user()->isAdmin()) {
-        return redirect()->intended('/admin/dashboard');
+        $request->session()->regenerate();
+
+        // Redirect berdasarkan role sesuai spesifikasi GEMINI.md
+        if ($request->user()->role === 'admin') {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        }
+
+        return redirect()->intended(route('citizen.dashboard', absolute: false));
     }
 
-    return redirect()->intended('/feed');
-    }
-
-    /**
-     * Destroy an authenticated session.
-     */
     public function destroy(Request $request): RedirectResponse
     {
+        // Simpan status admin sebelum sesi dihancurkan
+        $isAdmin = Auth::user() && Auth::user()->role === 'admin';
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // Redirect dinamis: Admin ke login, warga ke landing page
+        return $isAdmin ? redirect()->route('login') : redirect('/');
     }
 }
