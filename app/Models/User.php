@@ -2,45 +2,36 @@
 
 namespace App\Models;
 
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+#[Fillable(['name', 'email', 'password', 'role'])]
+#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
-     * Kolom yang boleh diisi secara massal (mass assignment).
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',         // Tambahan CivilWatch: menentukan admin atau citizen
-    ];
-
-    /**
-     * Kolom yang disembunyikan saat model dikonversi ke array/JSON.
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Casting tipe data kolom.
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
         ];
     }
 
     // =========================================================
-    // HELPER METHOD
+    // HELPER METHODS
     // =========================================================
 
     /**
@@ -52,7 +43,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Cek apakah user ini adalah citizen.
+     * Cek apakah user ini adalah warga/citizen.
      */
     public function isCitizen(): bool
     {
@@ -64,7 +55,7 @@ class User extends Authenticatable
     // =========================================================
 
     /**
-     * One-to-Many: Satu user bisa membuat banyak laporan.
+     * One-to-Many: User ini telah membuat banyak laporan.
      */
     public function reports()
     {
@@ -72,8 +63,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Many-to-Many: Laporan-laporan yang pernah di-upvote user ini.
-     * Menggunakan tabel pivot: upvotes
+     * Many-to-Many: Laporan-laporan yang di-upvote oleh user ini.
      */
     public function upvotedReports()
     {
