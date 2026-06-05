@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->string('image')->nullable();  // Path foto bukti kerusakan
-            $table->enum('status', ['pending', 'in_progress', 'resolved', 'rejected'])
+            $table->enum('status', ['pending', 'published', 'in_progress', 'resolved', 'rejected'])
                   ->default('pending');
             $table->timestamps();
         });

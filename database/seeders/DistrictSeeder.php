@@ -9,12 +9,13 @@ class DistrictSeeder extends Seeder
 {
     public function run(): void
     {
+        // Daftar 5 Kecamatan resmi di Kota Banjarmasin
         $districts = [
-            'Jekan Raya',
-            'Pahandut',
-            'Sabangau',
-            'Bukit Batu',
-            'Rakumpit',
+            'Banjarmasin Tengah',
+            'Banjarmasin Utara',
+            'Banjarmasin Selatan',
+            'Banjarmasin Barat',
+            'Banjarmasin Timur',
         ];
 
         foreach ($districts as $name) {
