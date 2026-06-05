@@ -77,4 +77,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Halaman 13 (Bagian Status): Rute Verifikasi Status oleh Admin
     Route::patch('/reports/{id}/status', [ReportController::class, 'updateStatus'])->name('reports.update-status');
+
+    // Hapus Laporan Admin
+    Route::delete('/reports/{id}', [ReportController::class, 'adminDestroy'])->name('reports.destroy');
 });
