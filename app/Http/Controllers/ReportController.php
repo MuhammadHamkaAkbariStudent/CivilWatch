@@ -13,11 +13,7 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    /**
-     * =====================================================================
-     * 👤 PANEL WARGA (CITIZEN WORKSPACE)
-     * =====================================================================
-     */
+    // PANEL WARGA (CITIZEN WORKSPACE)
 
     /**
      * Menampilkan daftar laporan milik warga yang sedang login (Halaman 7).
@@ -28,23 +24,19 @@ class ReportController extends Controller
         return redirect()->route('citizen.dashboard');
     }
 
-    /**
-     * Menampilkan form pembuatan laporan baru (Halaman 8).
-     */
+    // Menampilkan form pembuatan laporan baru (Halaman 8).
     public function create()
     {
         $districts = District::all();
         return view('citizen.reports.create', compact('districts'));
     }
 
-    /**
-     * Menyimpan data laporan baru ke database (Mengamankan aset foto nullable).
-     */
+    // Menyimpan data laporan baru ke database (Mengamankan aset foto nullable).
     public function store(StoreReportRequest $request)
     {
         $validated = $request->validated();
 
-        // Antisipasi jika foto tidak diunggah / bersifat opsional 👈 Perbaikan Revisi 3
+        // Antisipasi jika foto tidak diunggah / bersifat opsional
         $imagePath = null;
         if ($request->hasFile('photo')) {
             $imagePath = $request->file('photo')->store('reports', 'public');
@@ -78,9 +70,7 @@ class ReportController extends Controller
         return redirect()->route('reports.show', $report->id);
     }
 
-    /**
-     * Menampilkan form edit laporan (Menggunakan Otorisasi Policy).
-     */
+    // Menampilkan form edit laporan (Menggunakan Otorisasi Policy).
     public function edit(string $id)
     {
         $report = Report::findOrFail($id);
@@ -92,14 +82,12 @@ class ReportController extends Controller
         return view('citizen.reports.edit', compact('report', 'districts'));
     }
 
-    /**
-     * Memperbarui data laporan di database (Menggunakan Otorisasi Policy).
-     */
+    // Memperbarui data laporan di database (Menggunakan Otorisasi Policy).
     public function update(UpdateReportRequest $request, string $id)
     {
         $report = Report::findOrFail($id);
 
-        // Proteksi mutlak lewat Policy 👈 Perbaikan Revisi 1
+        // Proteksi mutlak lewat Policy
         Gate::authorize('update', $report);
 
         $validated = $request->validated();
@@ -124,14 +112,12 @@ class ReportController extends Controller
             ->with('success', 'Laporan berhasil diperbarui.');
     }
 
-    /**
-     * Menghapus laporan beserta aset fotonya (Menggunakan Otorisasi Policy).
-     */
+    // Menghapus laporan beserta aset fotonya (Menggunakan Otorisasi Policy).
     public function destroy(string $id)
     {
         $report = Report::findOrFail($id);
 
-        // Proteksi mutlak lewat Policy sebelum eksekusi hapus file 👈 Perbaikan Revisi 1
+        // Proteksi mutlak lewat Policy sebelum eksekusi hapus file
         Gate::authorize('delete', $report);
 
         if ($report->image) {
@@ -144,16 +130,8 @@ class ReportController extends Controller
             ->with('success', 'Laporan berhasil dihapus.');
     }
 
-
-    /**
-     * =====================================================================
-     * 🌍 AKSES PUBLIK (PENGUNJUNG UMUM)
-     * =====================================================================
-     */
-
-    /**
-     * Menampilkan Public Feed dengan sistem Filter Kecamatan dan Search (Halaman 5).
-     */
+    // AKSES PUBLIK (PENGUNJUNG UMUM)
+    // Menampilkan Public Feed dengan sistem Filter Kecamatan dan Search (Halaman 5).
     public function publicFeed(Request $request)
     {
         // Admin tidak memiliki akses ke halaman publik, langsung redirect ke dashboard admin
@@ -182,9 +160,7 @@ class ReportController extends Controller
         return view('feed', compact('reports', 'districts'));
     }
 
-    /**
-     * Menampilkan rincian aduan terbuka untuk publik (Halaman 6).
-     */
+    // Menampilkan rincian aduan terbuka untuk publik (Halaman 6).
     public function publicShow(string $id)
     {
         // Admin langsung ke halaman detail admin, bukan halaman publik
@@ -204,16 +180,8 @@ class ReportController extends Controller
         return view('reports.show', compact('report'));
     }
 
-
-    /**
-     * =====================================================================
-     * 📊 PANEL ADMIN (ADMIN CONTROL PANEL)
-     * =====================================================================
-     */
-
-    /**
-     * KHUSUS ADMIN: Menampilkan daftar semua laporan + Fitur Filter Status (Halaman 12).
-     */
+    // PANEL ADMIN (ADMIN CONTROL PANEL)
+    // KHUSUS ADMIN: Menampilkan daftar semua laporan + Fitur Filter Status (Halaman 12).
     public function adminIndex(Request $request)
     {
         $query = Report::with(['user', 'district'])->withCount('upvotes');
@@ -223,12 +191,12 @@ class ReportController extends Controller
             $query->where('title', 'ilike', '%' . $request->search . '%');
         }
 
-        // Filter 2: Berdasarkan Dropdown Kategori Status (Pending/Published/dll) 👈 Perbaikan Revisi 2
+        // Filter 2: Berdasarkan Dropdown Kategori Status (Pending/Published/dll)
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
         }
 
-        // Filter 3: Berdasarkan Dropdown Wilayah/Kecamatan 👈 Perbaikan Baru
+        // Filter 3: Berdasarkan Dropdown Wilayah/Kecamatan
         if ($request->has('district_id') && $request->district_id != '') {
             $query->where('district_id', $request->district_id);
         }
@@ -246,12 +214,10 @@ class ReportController extends Controller
         return view('admin.reports.index', compact('reports', 'districts'));
     }
 
-    /**
-     * KHUSUS ADMIN: Layar pemeriksaan mendalam + Penghitung Total Dukungan (Halaman 13).
-     */
+    // KHUSUS ADMIN: Layar pemeriksaan mendalam + Penghitung Total Dukungan (Halaman 13).
     public function adminShow(string $id)
     {
-        // Menambahkan hitungan upvote agar admin tahu tingkat kedaruratan laporan 👈 Perbaikan Revisi 4
+        // Menambahkan hitungan upvote agar admin tahu tingkat kedaruratan laporan
         $report = Report::with(['user', 'district', 'progressUpdates'])
             ->withCount('upvotes')
             ->findOrFail($id);
@@ -259,9 +225,7 @@ class ReportController extends Controller
         return view('admin.reports.show', compact('report'));
     }
 
-    /**
-     * Aksi Eksekusi Validasi Status oleh Admin.
-     */
+    // Aksi Eksekusi Validasi Status oleh Admin.
     public function updateStatus(Request $request, string $id)
     {
         $validated = $request->validate([
