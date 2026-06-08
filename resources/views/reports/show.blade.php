@@ -1,142 +1,216 @@
-<x-app-layout>
-    <x-slot name="title">{{ $report->title }}</x-slot>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>CivilWatch — {{ $report->title }}</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=sora:300,400,500,600,700,800|ibm-plex-mono:400,500&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        :root{--primary:#1E3A8A;--primary-dark:#162d6e;--accent:#F97316;--bg:#F8FAFC;--surface:#FFFFFF;--text:#334155;--text-muted:#64748B;--text-light:#94A3B8;--border:#E2E8F0;--success:#10B981;--warning:#F59E0B;--danger:#EF4444;}
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);}
+        .top-nav{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+        .top-nav-inner{max-width:1100px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+        .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
+        .nav-brand-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+        .nav-brand-text{font-size:17px;font-weight:700;color:var(--primary);}
+        .back-link{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;color:var(--text-muted);text-decoration:none;padding:7px 12px;border-radius:7px;transition:all .15s;}
+        .back-link:hover{background:var(--bg);color:var(--primary);}
+        /* LAYOUT */
+        .detail-wrap{max-width:1100px;margin:0 auto;padding:32px;display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;}
+        /* MAIN */
+        .report-main{display:flex;flex-direction:column;gap:20px;}
+        .report-img{width:100%;border-radius:12px;object-fit:cover;max-height:420px;border:1px solid var(--border);}
+        .report-img-placeholder{width:100%;height:300px;border-radius:12px;background:linear-gradient(135deg,#EFF6FF,#BFDBFE);display:flex;align-items:center;justify-content:center;font-size:80px;border:1px solid var(--border);}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+        .card-body{padding:24px;}
+        .report-title{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:14px;line-height:1.3;}
+        .report-meta-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+        .meta-item{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text-muted);}
+        .meta-item strong{color:var(--text);font-weight:600;}
+        .report-desc{font-size:15px;color:var(--text);line-height:1.8;}
+        /* STATUS BADGE */
+        .badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;}
+        .b-published{background:#DBEAFE;color:#1E40AF;border:1px solid #93C5FD;}
+        .b-in_progress{background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;}
+        .b-resolved{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;}
+        .b-pending{background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;}
+        /* TIMELINE */
+        .timeline-wrap{position:relative;padding-left:28px;}
+        .timeline-wrap::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border);}
+        .tl-item{position:relative;margin-bottom:24px;}
+        .tl-item:last-child{margin-bottom:0;}
+        .tl-dot{position:absolute;left:-25px;top:3px;width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--border);}
+        .tl-dot.first{background:var(--primary);}
+        .tl-dot.middle{background:var(--warning);}
+        .tl-dot.last{background:var(--success);}
+        .tl-date{font-size:11px;color:var(--text-light);font-family:'IBM Plex Mono',monospace;margin-bottom:5px;}
+        .tl-content{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+        .tl-note{font-size:13.5px;color:var(--text);line-height:1.6;}
+        /* SIDEBAR */
+        .sidebar-card{display:flex;flex-direction:column;gap:16px;}
+        .info-row{display:flex;flex-direction:column;gap:4px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+        .info-row:last-child{border-bottom:none;padding-bottom:0;}
+        .info-label{font-size:11px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;}
+        .info-value{font-size:14px;color:var(--text);font-weight:500;}
+        /* UPVOTE */
+        .upvote-hero{text-align:center;padding:24px;background:var(--bg);border:2px dashed var(--border);border-radius:12px;}
+        .upvote-count{font-size:40px;font-weight:700;color:var(--text);font-family:'IBM Plex Mono',monospace;line-height:1;}
+        .upvote-label{font-size:13px;color:var(--text-muted);margin-top:4px;margin-bottom:16px;}
+        .upvote-btn-lg{width:100%;padding:12px;border-radius:9px;font-size:14px;font-weight:600;font-family:'Sora',sans-serif;cursor:pointer;border:1.5px solid;transition:all .15s;}
+        .upvote-btn-lg:not(.upvoted){background:var(--surface);color:var(--text-muted);border-color:var(--border);}
+        .upvote-btn-lg:not(.upvoted):hover{background:#FFF7ED;border-color:var(--accent);color:var(--accent);}
+        .upvote-btn-lg.upvoted{background:#FFF7ED;border-color:var(--accent);color:var(--accent);}
+        /* SECTION TITLE */
+        .sec-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a href="{{ route('home') }}" class="nav-brand">
+                <span class="nav-brand-text">CivilWatch</span>
+            </a>
+            <a href="{{ route('feed') }}" class="back-link">← Kembali ke Feed</a>
+        </div>
+    </nav>
 
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="detail-wrap">
+        <!-- MAIN CONTENT -->
+        <div class="report-main">
+            <!-- IMAGE -->
+            @if($report->image)
+                <img src="{{ asset('storage/'.$report->image) }}" alt="{{ $report->title }}" class="report-img">
+            @else
+                <div class="report-img-placeholder">🚧</div>
+            @endif
 
-        <nav class="flex items-center gap-2 text-sm text-slate-500 mb-8">
-            <a href="{{ route('feed') }}" class="hover:text-[--cw-blue] transition">Laporan Publik</a>
-            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            <span class="text-slate-700 font-medium truncate max-w-[200px]">{{ $report->title }}</span>
-        </nav>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-            <div class="lg:col-span-2 space-y-6">
-                @if($report->image)
-                    <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-                        <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="w-full object-cover max-h-96">
+            <!-- REPORT INFO -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="report-meta-row">
+                        @php
+                            $statusMap = ['published'=>['label'=>'Diterima','class'=>'b-published','icon'=>'🔵'],'in_progress'=>['label'=>'Sedang Diproses','class'=>'b-in_progress','icon'=>'⚙️'],'resolved'=>['label'=>'Selesai','class'=>'b-resolved','icon'=>'✅'],'pending'=>['label'=>'Menunggu','class'=>'b-pending','icon'=>'⏳']];
+                            $s = $statusMap[$report->status] ?? ['label'=>$report->status,'class'=>'b-published','icon'=>'•'];
+                        @endphp
                     </div>
-                @else
-                    <div class="rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 h-64 flex items-center justify-center border border-slate-200">
-                        <div class="text-center">
-                            <svg class="w-12 h-12 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <p class="text-xs text-slate-400">Tidak ada foto</p>
-                        </div>
-                    </div>
-                @endif
-
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                    @php
-                        $statusConfig = [
-                            'published'   => ['label' => 'Terverifikasi', 'class' => 'bg-blue-100 text-blue-700', 'dot' => 'bg-blue-500'],
-                            'in_progress' => ['label' => 'Sedang Ditangani', 'class' => 'bg-amber-100 text-amber-700', 'dot' => 'bg-amber-500'],
-                            'resolved'    => ['label' => 'Telah Diselesaikan', 'class' => 'bg-emerald-100 text-emerald-700', 'dot' => 'bg-emerald-500'],
-                        ];
-                        $sc = $statusConfig[$report->status] ?? ['label' => $report->status, 'class' => 'bg-slate-100 text-slate-700', 'dot' => 'bg-slate-400'];
-                    @endphp
-
-                    <h1 class="text-2xl font-bold text-[--cw-navy] mb-4">{{ $report->title }}</h1>
-                    <p class="text-slate-600 leading-relaxed text-sm">{{ $report->description }}</p>
-
-                    <div class="flex items-center gap-3 mt-6 pt-5 border-t border-slate-100">
-                        <div class="w-10 h-10 bg-[--cw-navy] rounded-full flex items-center justify-center text-white font-bold text-sm">
-                            {{ strtoupper(substr($report->user->name, 0, 1)) }}
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-slate-700">{{ $report->user->name }}</p>
-                            <p class="text-xs text-slate-400">Pelapor · {{ $report->created_at->diffForHumans() }}</p>
-                        </div>
-                    </div>
+                    <div class="report-title">{{ $report->title }}</div>
+                    <div class="report-desc">{{ $report->description }}</div>
                 </div>
-
-                @if($report->progressUpdates->isNotEmpty())
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                        <h2 class="font-bold text-[--cw-navy] text-lg mb-6 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-[--cw-blue]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                            Linimasa Penanganan
-                        </h2>
-                        <div class="relative space-y-6">
-                            <div class="absolute left-4 top-4 bottom-0 w-0.5 bg-slate-100"></div>
-
-                            @foreach($report->progressUpdates as $index => $update)
-                                <div class="relative flex gap-4 pl-12">
-                                    <div class="absolute left-0 w-8 h-8 rounded-full flex items-center justify-center {{ $index === $report->progressUpdates->count() - 1 ? 'bg-[--cw-blue] text-white' : 'bg-slate-100 text-slate-400' }} z-10">
-                                        @if($index === $report->progressUpdates->count() - 1)
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                        @else
-                                            <span class="text-xs font-bold">{{ $index + 1 }}</span>
-                                        @endif
-                                    </div>
-                                    <div class="bg-slate-50 rounded-xl p-4 flex-1">
-                                        <p class="text-sm text-slate-700 leading-relaxed">{{ $update->note }}</p>
-                                        <p class="text-xs text-slate-400 mt-2">{{ $update->created_at->format('d M Y, H:i') }}</p>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @else
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                        <h2 class="font-bold text-[--cw-navy] text-lg mb-6 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-[--cw-blue]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                            Linimasa Penanganan
-                        </h2>
-                        <div class="text-center py-8">
-                            <svg class="w-10 h-10 text-slate-200 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <p class="text-sm text-slate-400">Belum ada pembaruan dari petugas</p>
-                        </div>
-                    </div>
-                @endif
             </div>
 
-            <div class="space-y-6">
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 text-center">
-                    <p class="text-5xl font-bold text-[--cw-navy]">{{ $report->upvote_count }}</p>
-                    <p class="text-sm text-slate-500 mt-1 mb-5">Warga mendukung laporan ini</p>
-
-                    @auth
-                        @php $hasUpvoted = auth()->user()->upvotedReports->contains($report->id); @endphp
-                        <form method="POST" action="{{ route('reports.upvote', $report->id) }}">
-                            @csrf
-                            <button type="submit" class="w-full py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 {{ $hasUpvoted ? 'bg-rose-100 text-rose-600 hover:bg-rose-200' : 'bg-rose-500 text-white hover:bg-rose-600 shadow-lg shadow-rose-500/25' }}">
-                                <svg class="w-5 h-5" fill="{{ $hasUpvoted ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                                {{ $hasUpvoted ? 'Batalkan Dukungan' : 'Dukung Laporan Ini' }}
-                            </button>
-                        </form>
+            <!-- PROGRESS TIMELINE -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="sec-title">📋 Riwayat Penanganan</div>
+                    @if($report->progressUpdates->count() > 0)
+                    <div class="timeline-wrap">
+                        <!-- Initial submitted event -->
+                        <div class="tl-item">
+                            <div class="tl-dot first"></div>
+                            <div class="tl-date">{{ $report->created_at->format('d M Y, H:i') }}</div>
+                            <div class="tl-content">
+                                <div class="tl-note">✍️ Laporan diajukan oleh warga dan menunggu verifikasi admin.</div>
+                            </div>
+                        </div>
+                        @foreach($report->progressUpdates as $i => $update)
+                        <div class="tl-item">
+                            <div class="tl-dot {{ $loop->last ? 'last' : 'middle' }}"></div>
+                            <div class="tl-date">{{ $update->created_at->format('d M Y, H:i') }}</div>
+                            <div class="tl-content">
+                                <div class="tl-note">{{ $update->note }}</div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
                     @else
-                        <a href="{{ route('login') }}" class="block w-full py-3 bg-slate-100 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-200 transition-all">
+                    <div style="text-align:center;padding:32px 20px;color:var(--text-muted);">
+                        <div style="font-size:32px;margin-bottom:10px;opacity:.5">⏳</div>
+                        <div style="font-size:14px;">Laporan sedang dalam antrian verifikasi. Belum ada catatan progres.</div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar-card">
+            <!-- UPVOTE -->
+            <div class="card">
+                <div class="card-body">
+                    @auth
+                    <div
+                        x-data="{
+                            count: {{ $report->upvotes_count }},
+                            upvoted: {{ Auth::user()->upvotedReports->contains($report->id) ? 'true' : 'false' }},
+                            async toggle() {
+                                const r = await fetch('{{ route('reports.upvote', $report->id) }}', {
+                                    method:'POST',
+                                    headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json','Content-Type':'application/json'}
+                                });
+                                const d = await r.json();
+                                if(d.success){this.count=d.count;this.upvoted=d.upvoted;}
+                            }
+                        }"
+                    >
+                        <div class="upvote-hero">
+                            <div class="upvote-count" x-text="count">{{ $report->upvotes_count }}</div>
+                            <div class="upvote-label">Total Dukungan Warga</div>
+                            <button @click="toggle" :class="['upvote-btn-lg', upvoted ? 'upvoted' : '']">
+                                <span x-text="upvoted ? '👍 Kamu Mendukung Ini' : '👍 Dukung Laporan Ini'">
+                                    {{ Auth::user()->upvotedReports->contains($report->id) ? '👍 Kamu Mendukung Ini' : '👍 Dukung Laporan Ini' }}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    @else
+                    <div class="upvote-hero">
+                        <div class="upvote-count">{{ $report->upvotes_count }}</div>
+                        <div class="upvote-label">Total Dukungan Warga</div>
+                        <a href="{{ route('login') }}" class="upvote-btn-lg" style="display:block;text-align:center;text-decoration:none;border:1.5px solid var(--border);border-radius:9px;padding:12px;font-size:14px;font-weight:600;color:var(--text-muted);">
                             Masuk untuk Mendukung
                         </a>
+                    </div>
                     @endauth
                 </div>
+            </div>
 
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
-                    <h3 class="font-bold text-slate-700 text-sm">Informasi Laporan</h3>
-                    <div class="space-y-3 text-sm">
-                        <div class="flex justify-between gap-2">
-                            <span class="text-slate-400">Kecamatan</span>
-                            <span class="font-medium text-slate-700 text-right">{{ $report->district->name }}</span>
+            <!-- DETAIL INFO -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="sec-title">Informasi Laporan</div>
+                    <div style="display:flex;flex-direction:column;gap:14px;">
+                        <div class="info-row">
+                            <div class="info-label">Wilayah / Kecamatan</div>
+                            <div class="info-value">{{ $report->district->name ?? '-' }}</div>
                         </div>
-                        <div class="flex justify-between gap-2">
-                            <span class="text-slate-400">Status</span>
-                            <span class="font-semibold {{ str_contains($sc['class'], 'emerald') ? 'text-emerald-600' : (str_contains($sc['class'], 'amber') ? 'text-amber-600' : 'text-blue-600') }}">{{ $sc['label'] }}</span>
+                        <div class="info-row">
+                            <div class="info-label">Pelapor</div>
+                            <div class="info-value">{{ $report->user->name ?? 'Anonim' }}</div>
                         </div>
-                        <div class="flex justify-between gap-2">
-                            <span class="text-slate-400">Dilaporkan</span>
-                            <span class="font-medium text-slate-700">{{ $report->created_at->format('d M Y') }}</span>
+                        <div class="info-row">
+                            <div class="info-label">Tanggal Laporan</div>
+                            <div class="info-value">{{ $report->created_at->format('d M Y') }}</div>
                         </div>
-                        <div class="flex justify-between gap-2">
-                            <span class="text-slate-400">Progress</span>
-                            <span class="font-medium text-slate-700">{{ $report->progressUpdates->count() }} catatan</span>
+                        <div class="info-row">
+                            <div class="info-label">Terakhir Diperbarui</div>
+                            <div class="info-value">{{ $report->updated_at->diffForHumans() }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Status Saat Ini</div>
+                            <div><span class="badge {{ $s['class'] }}">{{ $s['icon'] }} {{ $s['label'] }}</span></div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Total Catatan Progres</div>
+                            <div class="info-value">{{ $report->progressUpdates->count() }} catatan</div>
                         </div>
                     </div>
                 </div>
-
-                <a href="{{ route('feed') }}" class="bg-[--cw-navy] flex items-center justify-center gap-2 w-full py-3 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                    Kembali ke Daftar
-                </a>
             </div>
         </div>
     </div>
-</x-app-layout>
+</body>
+</html>
