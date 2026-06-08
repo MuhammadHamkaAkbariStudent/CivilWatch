@@ -14,38 +14,40 @@ class UpvoteController extends Controller
      */
     public function toggle(Request $request, string $id)
     {
-        // Cari laporan yang hanya boleh tampil publik
-        $report = Report::whereIn('status', [
-            Report::STATUS_PUBLISHED,
-            Report::STATUS_IN_PROGRESS,
-            Report::STATUS_RESOLVED,
-        ])->findOrFail($id);
-
+        // Cari laporan berdasarkan ID
+        $report = Report::findOrFail($id);
+        
         // Ambil user yang sedang login
         $user = Auth::user();
 
-        // Fitur Many-to-Many Toggle:
-        // Jika user belum upvote, maka akan ditambahkan.
-        // Jika sudah upvote, maka akan dihapus.
-        $result = $report->upvotes()->toggle($user->id);
+        // Jika laporan sudah ditangani (resolved), tidak bisa di-upvote lagi
+        if ($report->status === Report::STATUS_RESOLVED) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Laporan yang sudah selesai ditangani tidak dapat didukung lagi.'
+                ], 422);
+            }
+            return back()->with('error', 'Laporan yang sudah selesai ditangani tidak dapat didukung lagi.');
+        }
 
-        // Cek hasil toggle
-        $isAttached = count($result['attached']) > 0;
+        // Fitur Many-to-Many Toggle: 
+        // Jika user belum upvote, maka akan ditambahkan. 
+        // Jika sudah upvote, maka akan dihapus (un-vote).
+        $report->upvotes()->toggle($user->id);
 
         // Hitung ulang total upvote setelah toggle
         $newCount = $report->upvotes()->count();
+        $isUpvoted = $report->upvotes()->where('user_id', $user->id)->exists();
 
-        // Jika request datang dari AJAX, kembalikan JSON
+        // Jika request datang dari AJAX (Alpine.js), kembalikan JSON
         if ($request->expectsJson()) {
             return response()->json([
-                'success' => true,
-                'count' => $newCount,
-                'upvoted' => $isAttached,
-                'action' => $isAttached ? 'attached' : 'detached',
+                'upvoted' => $isUpvoted,
+                'count'   => $newCount,
             ]);
         }
 
-        // Fallback jika bukan AJAX
+        // Fallback: Kembalikan user ke halaman sebelumnya jika bukan AJAX
         return back()->with('success', 'Status dukungan laporan berhasil diperbarui.');
     }
 }
