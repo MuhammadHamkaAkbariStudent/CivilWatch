@@ -10,7 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DistrictController;
 
 // =========================================================================
-// 🌍 1. AKSES PUBLIK & OTENTIKASI (Tanpa Login)
+// 1. AKSES PUBLIK & OTENTIKASI (Tanpa Login)
 // =========================================================================
 
 Route::get('/', [DashboardController::class, 'welcome'])->name('home');
@@ -19,7 +19,7 @@ Route::get('/feed', [ReportController::class, 'publicFeed'])->name('feed');
 Route::get('/reports/{id}', [ReportController::class, 'publicShow'])->name('reports.show');
 
 // =========================================================================
-// 🔐 2. AUTHENTICATED ACCESS (Harus Login - Umum)
+// 2. AUTHENTICATED ACCESS (Harus Login - Umum)
 // =========================================================================
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
 require __DIR__ . '/auth.php';
 
 // =========================================================================
-// 👤 3. CITIZEN ONLY WORKSPACE (Hak Akses Warga)
+// 3. CITIZEN ONLY WORKSPACE (Hak Akses Warga)
 // =========================================================================
 Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'citizen'])->name('dashboard');
@@ -41,7 +41,7 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
 });
 
 // =========================================================================
-// 📊 4. ADMIN ONLY CONTROL CENTER (Hak Akses Petugas)
+// 4. ADMIN ONLY CONTROL CENTER (Hak Akses Petugas)
 // =========================================================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
