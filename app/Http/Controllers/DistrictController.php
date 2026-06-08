@@ -13,8 +13,9 @@ class DistrictController extends Controller
      */
     public function index()
     {
-        $districts = District::orderBy('name', 'asc')->paginate(10);
-
+        $districts = District::withCount('reports')
+                    ->orderBy('name', 'asc')
+                    ->paginate(10);
         return view('admin.districts.index', compact('districts'));
     }
 
