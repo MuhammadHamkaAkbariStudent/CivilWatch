@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\District;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -15,10 +14,10 @@ class DashboardController extends Controller
     {
         $userId = Auth::id();
 
-        // Total Laporanku
+        // Menghitung total laporan user
         $myTotal = Report::where('user_id', $userId)->count();
 
-        // Laporan Diverifikasi (status: published, in_progress, atau resolved)
+        // Menghitung laporan yang sudah diverifikasi
         $myVerified = Report::where('user_id', $userId)
             ->whereIn('status', [
                 Report::STATUS_PUBLISHED,
@@ -26,12 +25,12 @@ class DashboardController extends Controller
                 Report::STATUS_RESOLVED,
             ])->count();
 
-        // Total Upvote yang Saya Berikan (ke laporan orang lain)
+        // Menghitung total upvote yang diberikan
         $myUpvotesGiven = DB::table('upvotes')
             ->where('user_id', $userId)
             ->count();
 
-        // Daftar Laporan Pribadi (termasuk status pending/rejected)
+        // Mengambil daftar laporan pribadi
         $reports = Report::with('district')
             ->where('user_id', $userId)
             ->orderBy('created_at', 'desc')

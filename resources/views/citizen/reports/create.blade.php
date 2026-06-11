@@ -163,7 +163,6 @@
                                 accept=".jpg,.jpeg,.png"
                                 @change="handleFile($event)"
                                 style="display:none;"
-                                required
                             >
                         </label>
                         @error('photo')<div class="form-error">{{ $message }}</div>@enderror
