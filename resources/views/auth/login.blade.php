@@ -1,47 +1,62 @@
 <x-guest-layout>
+    <div class="auth-form-title">Selamat Datang Kembali</div>
+    <div class="auth-form-sub">Masuk ke akun CivilWatch Anda untuk melanjutkan</div>
+
     <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if(session('status'))
+        <div class="alert alert-success" style="margin-bottom:16px">{{ session('status') }}</div>
+    @endif
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="form-group">
+            <label class="form-label" for="email">Alamat Email</label>
+            <input
+                id="email"
+                class="form-input"
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+                placeholder="warga@email.com"
+                required autofocus autocomplete="username"
+            >
+            @error('email')
+                <div class="form-error">{{ $message }}</div>
+            @enderror
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="form-group">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                <label class="form-label" for="password" style="margin-bottom:0">Kata Sandi</label>
+                @if(Route::has('password.request'))
+                    <a href="{{ route('password.request') }}" class="auth-link" style="font-size:13px;">Lupa password?</a>
+                @endif
+            </div>
+            <input
+                id="password"
+                class="form-input"
+                type="password"
+                name="password"
+                placeholder="••••••••"
+                required autocomplete="current-password"
+            >
+            @error('password')
+                <div class="form-error">{{ $message }}</div>
+            @enderror
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
+        <div class="checkbox-row" style="margin-bottom:20px;">
+            <input id="remember_me" type="checkbox" name="remember" style="width:16px;height:16px;">
+            <label for="remember_me">Ingat saya di perangkat ini</label>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="btn-auth">Masuk ke Akun</button>
     </form>
+
+    <div class="auth-footer">
+        Belum punya akun?
+        <a href="{{ route('register') }}" class="auth-link">Daftar gratis sekarang</a>
+    </div>
+
 </x-guest-layout>
