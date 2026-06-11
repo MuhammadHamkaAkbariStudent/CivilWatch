@@ -5,201 +5,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>CivilWatch — Public Feed</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=sora:300,400,500,600,700,800|ibm-plex-mono:400,500&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        :root {
-            --primary:#1E3A8A; --primary-dark:#162d6e; --accent:#F97316;
-            --bg:#F8FAFC; --surface:#FFFFFF; --text:#334155;
-            --text-muted:#64748B; --text-light:#94A3B8; --border:#E2E8F0;
-            --success:#10B981; --warning:#F59E0B; --danger:#EF4444; --info:#3B82F6;
-        }
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);}
-        .top-nav{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
-        .top-nav-inner{max-width:1280px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;}
-        .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
-        .nav-brand-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
-        .nav-brand-text{font-size:17px;font-weight:700;color:var(--primary);}
-        .nav-links{display:flex;align-items:center;gap:8px;}
-        .nav-link{font-size:13.5px;font-weight:500;color:var(--text-muted);text-decoration:none;padding:7px 14px;border-radius:7px;transition:all .15s;}
-        .nav-link:hover,.nav-link.active{background:var(--bg);color:var(--primary);}
-        .nav-auth{display:flex;align-items:center;gap:8px;}
-        .nav-btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Sora',sans-serif;text-decoration:none;cursor:pointer;border:1.5px solid;transition:all .15s;}
-        .nav-btn-outline{background:transparent;color:var(--primary);border-color:var(--primary);}
-        .nav-btn-outline:hover{background:var(--primary);color:#fff;}
-        .nav-btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);}
-        .nav-btn-primary:hover{background:var(--primary-dark);}
-        /* FEED LAYOUT */
-        .feed-wrap{max-width:1280px;margin:0 auto;padding:32px;}
-        .feed-header{margin-bottom:28px;}
-        .feed-title{font-size:26px;font-weight:700;color:var(--text);letter-spacing:-.5px;}
-        .feed-desc{font-size:14px;color:var(--text-muted);margin-top:4px;}
-        /* FILTER */
-        .filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap;}
-        .search-wrap{position:relative;flex:1;min-width:240px;}
-        .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-light);pointer-events:none;}
-        .search-input{width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--border);border-radius:9px;font-size:13.5px;font-family:'Sora',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s;}
-        .search-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(30,58,138,.06);}
-        .filter-select{padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:13.5px;font-family:'Sora',sans-serif;color:var(--text);background:var(--surface);outline:none;min-width:160px;cursor:pointer;transition:border-color .15s;}
-        .filter-select:focus{border-color:var(--primary);}
-        .filter-btn{padding:10px 18px;border-radius:9px;font-size:13px;font-weight:600;font-family:'Sora',sans-serif;cursor:pointer;border:1.5px solid;transition:all .15s;}
-        .filter-btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);}
-        .filter-btn-primary:hover{background:var(--primary-dark);}
-        .filter-btn-reset{background:transparent;color:var(--text-muted);border-color:var(--border);}
-        .filter-btn-reset:hover{border-color:var(--text-light);color:var(--text);}
-        /* GRID */
-        .report-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;}
-        .report-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s;}
-        .report-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(30,58,138,.1);}
-        .rc-img{width:100%;height:176px;object-fit:cover;background:linear-gradient(135deg,#EFF6FF,#BFDBFE);display:flex;align-items:center;justify-content:center;font-size:48px;}
-        .rc-body{padding:16px;flex:1;display:flex;flex-direction:column;}
-        .rc-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-        .rc-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:12px;}
-        .rc-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.4;}
-        .rc-desc{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:14px;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-        .rc-footer{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border);margin-top:auto;}
-        .rc-district{font-size:12px;color:var(--text-light);display:flex;align-items:center;gap:4px;}
-        .rc-link{font-size:13px;font-weight:600;color:var(--primary);text-decoration:none;}
-        .rc-link:hover{text-decoration:underline;}
-        /* UPVOTE */
-        .upvote-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:16px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;transition:all .15s;font-family:'Sora',sans-serif;}
-        .upvote-btn:hover,.upvote-btn.upvoted{background:#FFF7ED;border-color:var(--accent);color:var(--accent);}
-        /* STATUS BADGES */
-        .b-published{background:#DBEAFE;color:#1E40AF;border:1px solid #93C5FD;}
-        .b-in_progress{background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;}
-        .b-resolved{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;}
-        /* EMPTY */
-        .empty{text-align:center;padding:80px 20px;}
-        .empty-icon{font-size:56px;margin-bottom:16px;opacity:.5;}
-        .empty-title{font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px;}
-        .empty-desc{font-size:14px;color:var(--text-muted);}
-        /* PAGINATION */
-        .pag-wrap{display:flex;justify-content:center;margin-top:32px;}
-        .pag-inner{display:flex;align-items:center;gap:4px;}
-        .pag-btn{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:0 10px;border-radius:7px;font-size:13px;font-weight:500;text-decoration:none;color:var(--text-muted);border:1px solid var(--border);background:var(--surface);transition:all .15s;cursor:pointer;}
-        .pag-btn:hover{background:var(--bg);color:var(--primary);border-color:var(--primary);}
-        .pag-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
-        /* COUNT */
-        .result-count{font-size:13px;color:var(--text-muted);margin-bottom:20px;}
-        .result-count strong{color:var(--text);}
-    </style>
 </head>
-<body>
-    <nav class="top-nav">
-        <div class="top-nav-inner">
-            <a href="{{ route('home') }}" class="nav-brand">
-                <span class="nav-brand-text">CivilWatch</span>
-            </a>
-            <div class="nav-links">
-                <a href="{{ route('home') }}" class="nav-link">Beranda</a>
-                <a href="{{ route('feed') }}" class="nav-link active">Public Feed</a>
-            </div>
-            <div class="nav-auth">
-                @auth
-                    @if(Auth::user()->role === 'citizen')
-                        <a href="{{ route('citizen.dashboard') }}" class="nav-btn nav-btn-outline">Dashboard</a>
-                        <a href="{{ route('citizen.reports.create') }}" class="nav-btn nav-btn-primary">Buat Laporan</a>
-                    @endif
-                @else
-                    <a href="{{ route('login') }}" class="nav-btn nav-btn-outline">Masuk</a>
-                    <a href="{{ route('register') }}" class="nav-btn nav-btn-primary">Daftar</a>
-                @endauth
-            </div>
-        </div>
-    </nav>
+<body class="bg-grid">
 
-    <div class="feed-wrap">
-        <div class="feed-header">
-            <div class="feed-title">📋 Public Feed Laporan</div>
-            <div class="feed-desc">Laporan infrastruktur yang telah diverifikasi dan sedang/sudah ditangani</div>
+{{-- ═══ NAV ═══ --}}
+<nav class="pub-nav">
+    <div class="pub-nav-inner">
+        <a href="{{ route('home') }}" class="pub-brand">
+            <span class="pub-brand-text">CivilWatch</span>
+        </a>
+        <div class="pub-nav-links">
+            <a href="{{ route('home') }}" class="pub-nav-link">Beranda</a>
+            <a href="{{ route('feed') }}" class="pub-nav-link active">Public Feed</a>
         </div>
+        <div class="pub-nav-auth">
+            @auth
+                @if(Auth::user()->role === 'citizen')
+                    <a href="{{ route('citizen.dashboard') }}"      class="pub-nav-btn pub-nav-btn-outline">Dashboard</a>
+                    <a href="{{ route('citizen.reports.create') }}" class="pub-nav-btn pub-nav-btn-primary">Buat Laporan</a>
+                @endif
+            @else
+                <a href="{{ route('login') }}"    class="pub-nav-btn pub-nav-btn-outline">Masuk</a>
+                <a href="{{ route('register') }}" class="pub-nav-btn pub-nav-btn-primary">Daftar</a>
+            @endauth
+        </div>
+    </div>
+</nav>
 
-        <!-- FILTER BAR -->
-        <form method="GET" action="{{ route('feed') }}" x-data="{ search: '{{ request('search') }}', district: '{{ request('district_id') }}' }">
-            <div class="filter-bar">
-                <div class="search-wrap">
-                    <span class="search-icon">🔍</span>
-                    <input
-                        type="text"
-                        name="search"
-                        class="search-input"
-                        placeholder="Cari judul laporan..."
-                        value="{{ request('search') }}"
-                    >
-                </div>
-                <select name="district_id" class="filter-select">
-                    <option value="">Semua Kecamatan</option>
+{{-- ═══ FEED CONTENT ═══ --}}
+<div style="max-width:1280px;margin:0 auto;padding:32px;">
+
+    {{-- Page Header --}}
+    <div class="page-header">
+        <div class="page-title" style="display:flex;align-items:center;gap:8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+            Public Feed Laporan
+        </div>
+        <div class="page-desc">Laporan infrastruktur yang telah diverifikasi dan sedang / sudah ditangani</div>
+    </div>
+
+    {{-- Filter Form --}}
+    <form method="GET" action="{{ route('feed') }}" class="feed-filter-form">
+        <div class="filter-bar">
+            <div class="search-box">
+                <span class="search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input
+                    type="text"
+                    name="search"
+                    class="search-input"
+                    placeholder="Cari judul laporan..."
+                    value="{{ request('search') }}"
+                >
+            </div>
+
+            <div
+                x-data="{
+                    open: false,
+                    selected: '{{ request('district_id') }}',
+                    selectedLabel: '{{ $districts->firstWhere('id', request('district_id'))?->name ?? 'Semua Kecamatan' }}'}"
+                class="cw-select-wrapper"
+                @click.outside="open = false">
+                 {{-- Hidden input agar value tetap terkirim saat form submit --}}
+                <input type="hidden" name="district_id" :value="selected">
+
+                {{-- Trigger button --}}
+                <button
+                    type="button"
+                    class="cw-select-trigger"
+                    @click="open = !open"
+                    :class="{ 'cw-select-trigger--open': open }">
+        
+                    <span x-text="selectedLabel"></span>
+                    <svg class="cw-select-chevron" :class="{ 'rotated': open }"
+                        width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+
+                {{-- Dropdown list --}}
+                <ul class="cw-select-dropdown" x-show="open" x-transition>
+                    <li
+                        class="cw-select-option"
+                        :class="{ 'cw-select-option--active': selected === '' }"
+                        @click="selected = ''; selectedLabel = 'Semua Kecamatan'; open = false"
+                        @mouseenter="$el.classList.add('cw-select-option--hover')"
+                        @mouseleave="$el.classList.remove('cw-select-option--hover')">
+                        Semua Kecamatan
+                    </li>
                     @foreach($districts as $d)
-                        <option value="{{ $d->id }}" {{ request('district_id') == $d->id ? 'selected' : '' }}>
-                            {{ $d->name }}
-                        </option>
+                    <li
+                        class="cw-select-option"
+                        :class="{ 'cw-select-option--active': selected === '{{ $d->id }}' }"
+                        @click="selected = '{{ $d->id }}'; selectedLabel = '{{ $d->name }}'; open = false"
+                        @mouseenter="$el.classList.add('cw-select-option--hover')"
+                        @mouseleave="$el.classList.remove('cw-select-option--hover')">
+                        {{ $d->name }}
+                    </li>
                     @endforeach
-                </select>
-                <button type="submit" class="filter-btn filter-btn-primary">Terapkan Filter</button>
-                @if(request('search') || request('district_id'))
-                    <a href="{{ route('feed') }}" class="filter-btn filter-btn-reset">Reset</a>
-                @endif
+                </ul>
             </div>
-        </form>
 
-        <!-- RESULT COUNT -->
-        <div class="result-count">
-            Menampilkan <strong>{{ $reports->total() }}</strong> laporan
-            @if(request('search')) yang cocok dengan "<strong>{{ request('search') }}</strong>" @endif
-            @if(request('district_id') && $districts->firstWhere('id', request('district_id'))) di <strong>{{ $districts->firstWhere('id', request('district_id'))->name }}</strong> @endif
+            <button type="submit" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Terapkan Filter
+            </button>
+
+            @if(request('search') || request('district_id'))
+                <a href="{{ route('feed') }}" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Reset
+                </a>
+            @endif
         </div>
+    </form>
 
-        @if($reports->count() > 0)
-        <div class="report-grid">
+    {{-- Result Count --}}
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+        Menampilkan <strong style="color:var(--text);">{{ $reports->total() }}</strong> laporan
+        @if(request('search'))
+            yang cocok dengan "<strong>{{ request('search') }}</strong>"
+        @endif
+        @if(request('district_id') && ($matchDistrict = $districts->firstWhere('id', request('district_id'))))
+            di <strong>{{ $matchDistrict->name }}</strong>
+        @endif
+    </p>
+
+    {{-- Report Grid --}}
+    @if($reports->count() > 0)
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;">
             @foreach($reports as $report)
-            <div class="report-card">
-                @if($report->image)
-                    <img src="{{ asset('storage/'.$report->image) }}" alt="{{ $report->title }}" class="rc-img">
-                @else
-                    <div class="rc-img">
-                        @php
-                            $icons = ['🚧','💡','🌳','🚰','🏗️','⚠️','🛣️','🌉'];
-                            echo $icons[$report->id % count($icons)];
-                        @endphp
-                    </div>
-                @endif
+            @php
+                $statusMap = [
+                    'published'   => ['label' => 'Diterima', 'class' => 'b-published'],
+                    'in_progress' => ['label' => 'Diproses', 'class' => 'b-in_progress'],
+                    'resolved'    => ['label' => 'Selesai',  'class' => 'b-resolved'],
+                ];
+                $s = $statusMap[$report->status] ?? ['label' => $report->status, 'class' => 'b-published'];
+
+                $statusIcons = [
+                    'published'   => '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+                    'in_progress' => '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>',
+                    'resolved'    => '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+                ];
+                $si = $statusIcons[$report->status] ?? '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>';
+            @endphp
+
+            <a href="{{ route('reports.show', $report->id) }}" class="report-card">
+                <img src="{{ asset('storage/'.$report->image) }}"
+                     alt="{{ $report->title }}"
+                     class="rc-img"
+                     style="height:176px;object-fit:cover;">
 
                 <div class="rc-body">
                     <div class="rc-meta">
-                        @php
-                            $statusMap = [
-                                'published' => ['label'=>'Diterima','class'=>'b-published','icon'=>'🔵'],
-                                'in_progress' => ['label'=>'Diproses','class'=>'b-in_progress','icon'=>'⚙️'],
-                                'resolved' => ['label'=>'Selesai','class'=>'b-resolved','icon'=>'✅'],
-                            ];
-                            $s = $statusMap[$report->status] ?? ['label'=>$report->status,'class'=>'b-published','icon'=>'•'];
-                        @endphp
-                        <span class="rc-badge {{ $s['class'] }}">{{ $s['icon'] }} {{ $s['label'] }}</span>
-
-                        <!-- UPVOTE BUTTON (AJAX) -->
+                        <span class="rc-badge {{ $s['class'] }}" style="display:inline-flex;align-items:center;gap:4px;">
+                            {!! $si !!} {{ $s['label'] }}
+                        </span>
+                        {{-- Upvote Button --}}
                         @auth
-                        <div
-                            x-data="{
-                                count: {{ $report->upvotes_count }},
-                                upvoted: {{ Auth::user()->upvotedReports->contains($report->id) ? 'true' : 'false' }},
-                                async toggle() {
-                                    const r = await fetch('{{ route('reports.upvote', $report->id) }}', {
-                                        method:'POST',
-                                        headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json','Content-Type':'application/json'}
-                                    });
-                                    const d = await r.json();
-                                    if(d.success){ this.count = d.count; this.upvoted = d.upvoted; }
-                                }
-                            }"
-                        >
-                            <button @click="toggle" :class="['upvote-btn', upvoted ? 'upvoted' : '']">
-                                👍 <span x-text="count"></span>
+                        <div x-data="upvote({{ $report->id }}, {{ $report->upvotes_count }}, {{ Auth::user()->upvotedReports->contains($report->id) ? 'true' : 'false' }})">
+                            <button
+                                type="button"
+                                @click.prevent="toggle()"
+                                :class="['upvote-btn', upvoted ? 'upvoted' : '']"
+                                style="display:inline-flex;align-items:center;gap:5px;"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                                <span x-text="count">{{ $report->upvotes_count }}</span>
                             </button>
                         </div>
                         @else
-                        <a href="{{ route('login') }}" class="upvote-btn">👍 {{ $report->upvotes_count }}</a>
+                        <button
+                            type="button"
+                            class="upvote-btn"
+                            style="display:inline-flex;align-items:center;gap:5px;"
+                            @click.prevent.stop="window.location.href='{{ route('login') }}'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                            {{ $report->upvotes_count }}
+                        </button>
                         @endauth
                     </div>
 
@@ -207,32 +194,43 @@
                     <div class="rc-desc">{{ $report->description }}</div>
 
                     <div class="rc-footer">
-                        <div class="rc-district">
-                            📍 {{ $report->district->name ?? '-' }}
+                        <div class="rc-district" style="display:inline-flex;align-items:center;gap:4px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            {{ $report->district->name ?? '-' }}
                             <span style="color:var(--border);margin:0 4px">•</span>
-                            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">{{ $report->created_at->diffForHumans() }}</span>
+                            <span class="mono" style="font-size:11px;">{{ $report->created_at->diffForHumans() }}</span>
                         </div>
-                        <a href="{{ route('reports.show', $report->id) }}" class="rc-link">Detail →</a>
+                        <span class="rc-link" style="display:inline-flex;align-items:center;gap:4px;">
+                            Detail
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </span>
                     </div>
                 </div>
-            </div>
+            </a>
             @endforeach
         </div>
 
-        <!-- PAGINATION -->
-        <div class="pag-wrap">
-            <div class="pag-inner">
-                {{ $reports->appends(request()->query())->links('vendor.pagination.simple-tailwind') }}
-            </div>
+        {{-- Pagination --}}
+        <div style="display:flex;justify-content:center;margin-top:32px;">
+            {{ $reports->appends(request()->query())->links('vendor.pagination.simple-tailwind') }}
         </div>
 
-        @else
-        <div class="empty">
-            <div class="empty-icon">🔍</div>
-            <div class="empty-title">Tidak Ada Laporan Ditemukan</div>
-            <div class="empty-desc">Coba ubah kata kunci pencarian atau pilih kecamatan yang berbeda.</div>
+    @else
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="empty-state-title">Tidak Ada Laporan Ditemukan</div>
+            <div class="empty-state-desc">Coba ubah kata kunci pencarian atau pilih kecamatan yang berbeda.</div>
+            @if(request('search') || request('district_id'))
+                <a href="{{ route('feed') }}" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Reset Filter
+                </a>
+            @endif
         </div>
-        @endif
-    </div>
+    @endif
+
+</div>
 </body>
 </html>
