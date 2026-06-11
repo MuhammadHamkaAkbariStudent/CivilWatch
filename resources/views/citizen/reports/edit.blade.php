@@ -95,15 +95,67 @@
                     <!-- DISTRICT -->
                     <div class="form-group">
                         <label class="form-label" for="district_id">Lokasi / Kecamatan <span>*</span></label>
-                        <select id="district_id" name="district_id" class="form-select" required {{ !$report->isEditable() ? 'disabled' : '' }}>
-                            <option value="">-- Pilih Kecamatan --</option>
-                            @foreach($districts as $d)
-                                <option value="{{ $d->id }}" {{ (old('district_id', $report->district_id) == $d->id) ? 'selected' : '' }}>
-                                    {{ $d->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('district_id')<div class="form-error">{{ $message }}</div>@enderror
+                        @if(!$report->isEditable())
+                            {{-- If not editable, show read-only button and static label --}}
+                            <div class="cw-select-wrapper">
+                                <button type="button" class="cw-select-trigger" disabled style="width:100%; display:flex; align-items:center; justify-content:space-between; opacity:0.6; cursor:not-allowed;">
+                                    <span>{{ $report->district->name ?? '-' }}</span>
+                                </button>
+                                <input type="hidden" name="district_id" value="{{ $report->district_id }}">
+                            </div>
+                        @else
+                            <div
+                                x-data="{
+                                    open: false,
+                                    selected: '{{ old('district_id', $report->district_id) }}',
+                                    selectedLabel: '{{ $districts->firstWhere('id', old('district_id', $report->district_id))?->name ?? '-- Pilih Kecamatan --' }}'
+                                }"
+                                class="cw-select-wrapper"
+                                style="position:relative;"
+                                @click.outside="open = false"
+                            >
+                                <input type="hidden" name="district_id" :value="selected">
+                                
+                                <button
+                                    type="button"
+                                    class="cw-select-trigger"
+                                    @click="open = !open"
+                                    :class="{ 'cw-select-trigger--open': open }"
+                                    style="width:100%; display:flex; align-items:center; justify-content:space-between;"
+                                >
+                                    <span x-text="selectedLabel"></span>
+                                    <svg class="cw-select-chevron" :class="{ 'rotated': open }"
+                                        width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+
+                                <x-scrollable as="ul" class="cw-select-dropdown" maxHeight="200px" paddingRight="0px" x-show="open" x-transition style="width:100%;">
+                                    <li
+                                        class="cw-select-option"
+                                        :class="{ 'cw-select-option--active': selected === '' }"
+                                        @click="selected = ''; selectedLabel = '-- Pilih Kecamatan --'; open = false"
+                                        @mouseenter="$el.classList.add('cw-select-option--hover')"
+                                        @mouseleave="$el.classList.remove('cw-select-option--hover')"
+                                    >
+                                        -- Pilih Kecamatan --
+                                    </li>
+                                    @foreach($districts as $d)
+                                    <li
+                                        class="cw-select-option"
+                                        :class="{ 'cw-select-option--active': selected === '{{ $d->id }}' }"
+                                        @click="selected = '{{ $d->id }}'; selectedLabel = '{{ $d->name }}'; open = false"
+                                        @mouseenter="$el.classList.add('cw-select-option--hover')"
+                                        @mouseleave="$el.classList.remove('cw-select-option--hover')"
+                                    >
+                                        {{ $d->name }}
+                                    </li>
+                                    @endforeach
+                                </x-scrollable>
+                            </div>
+                        @endif
+                        @error('district_id')<div class="form-error" style="margin-top:4px;">{{ $message }}</div>@enderror
                     </div>
 
                     <!-- PHOTO -->

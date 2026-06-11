@@ -9,32 +9,10 @@
 </head>
 <body class="bg-grid">
 
-{{-- ═══ NAV ═══ --}}
-<nav class="pub-nav">
-    <div class="pub-nav-inner">
-        <a href="{{ route('home') }}" class="pub-brand">
-            <span class="pub-brand-text">CivilWatch</span>
-        </a>
-        <div class="pub-nav-links">
-            <a href="{{ route('home') }}" class="pub-nav-link">Beranda</a>
-            <a href="{{ route('feed') }}" class="pub-nav-link active">Public Feed</a>
-        </div>
-        <div class="pub-nav-auth">
-            @auth
-                @if(Auth::user()->role === 'citizen')
-                    <a href="{{ route('citizen.dashboard') }}"      class="pub-nav-btn pub-nav-btn-outline">Dashboard</a>
-                    <a href="{{ route('citizen.reports.create') }}" class="pub-nav-btn pub-nav-btn-primary">Buat Laporan</a>
-                @endif
-            @else
-                <a href="{{ route('login') }}"    class="pub-nav-btn pub-nav-btn-outline">Masuk</a>
-                <a href="{{ route('register') }}" class="pub-nav-btn pub-nav-btn-primary">Daftar</a>
-            @endauth
-        </div>
-    </div>
-</nav>
+<x-public-nav active="feed" />
 
 {{-- ═══ FEED CONTENT ═══ --}}
-<div style="max-width:1280px;margin:0 auto;padding:32px;">
+<div style="max-width:1200px;margin:0 auto;padding:32px;">
 
     {{-- Page Header --}}
     <div class="page-header">
@@ -87,7 +65,7 @@
                 </button>
 
                 {{-- Dropdown list --}}
-                <ul class="cw-select-dropdown" x-show="open" x-transition>
+                <x-scrollable as="ul" class="cw-select-dropdown" maxHeight="200px" paddingRight="0px" x-show="open" x-transition>
                     <li
                         class="cw-select-option"
                         :class="{ 'cw-select-option--active': selected === '' }"
@@ -106,7 +84,7 @@
                         {{ $d->name }}
                     </li>
                     @endforeach
-                </ul>
+                </x-scrollable>
             </div>
 
             <button type="submit" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;">
@@ -155,10 +133,12 @@
             @endphp
 
             <a href="{{ route('reports.show', $report->id) }}" class="report-card">
+                @if($report->image)
                 <img src="{{ asset('storage/'.$report->image) }}"
                      alt="{{ $report->title }}"
                      class="rc-img"
                      style="height:176px;object-fit:cover;">
+                @endif
 
                 <div class="rc-body">
                     <div class="rc-meta">

@@ -131,7 +131,7 @@
                 </button>
 
                 {{-- Dropdown list --}}
-                <ul class="cw-select-dropdown" x-show="open" x-transition>
+                <x-scrollable as="ul" class="cw-select-dropdown" maxHeight="200px" paddingRight="0px" x-show="open" x-transition>
                     <li
                         class="cw-select-option"
                         :class="{ 'cw-select-option--active': selected === '' }"
@@ -150,7 +150,7 @@
                         {{ $d->name }}
                     </li>
                     @endforeach
-                </ul>
+                </x-scrollable>
             </div>
             <div
                 x-data="{
@@ -180,7 +180,7 @@
                     </svg>
                 </button>
 
-                <ul class="cw-select-dropdown" x-show="open" x-transition>
+                <x-scrollable as="ul" class="cw-select-dropdown" maxHeight="200px" paddingRight="0px" x-show="open" x-transition>
                     <template x-for="opt in options" :key="opt.value">
                         <li
                             class="cw-select-option"
@@ -189,7 +189,7 @@
                             x-text="opt.label">
                         </li>
                     </template>
-                </ul>
+                </x-scrollable>
             </div>
             <button type="submit" class="btn btn-primary" style="padding:9px 18px;font-size:13.5px;">Terapkan</button>
             @if(request('search') || request('district_id') || request('sort_by'))

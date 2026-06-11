@@ -76,10 +76,10 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <h2 style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:16px;line-height:1.3;">{{ $report->title }}</h2>
-                    <div style="font-size:15px;color:var(--text);line-height:1.8;max-height:420px;overflow-y:auto;overflow-wrap:break-word;word-break:break-word;scrollbar-width:thin;scrollbar-color:#CBD5E1 transparent;">
+                    <h2 style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:16px;line-height:1.3;overflow-wrap:break-word;word-break:break-word;">{{ $report->title }}</h2>
+                    <x-scrollable maxHeight="420px" paddingRight="8px" style="font-size:15px;color:var(--text);line-height:1.8;overflow-wrap:break-word;word-break:break-word;">
                         {{ $report->description }}
-                    </div>
+                    </x-scrollable>
                 </div>
             </div>
 
@@ -94,7 +94,7 @@
                         <span style="font-size:12px;color:var(--text);font-family:'IBM Plex Mono',monospace;">{{ $report->progressUpdates->count() + 1 }} entri</span>
                     </div>
                 </div>
-                <div class="card-body" style="max-height:420px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#CBD5E1 transparent;">
+                <x-scrollable class="card-body" maxHeight="420px" paddingRight="16px">
                     <div class="timeline" style="position:relative;padding-left:28px;">
                         <div style="position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border);"></div>
 
@@ -127,7 +127,7 @@
                         </div>
                         @endforelse
                     </div>
-                </div>
+                </x-scrollable>
 
                 <!-- ADD NOTE FORM -->
                 <div style="padding:20px 24px;border-top:1px solid var(--border);background:var(--bg);">
