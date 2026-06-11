@@ -42,13 +42,13 @@ class DashboardController extends Controller
     // Dashboard Admin
     public function admin()
     {
-        // Matriks Eksekutif Global
+        // Menghitung statistik laporan global
         $totalReports = Report::count();
         $pendingReports = Report::where('status', Report::STATUS_PENDING)->count();
         $inProgressReports = Report::where('status', Report::STATUS_IN_PROGRESS)->count();
         $resolvedReports = Report::where('status', Report::STATUS_RESOLVED)->count();
 
-        // Tren Bulanan (6 bulan terakhir) — PostgreSQL syntax dengan TO_CHAR
+        // Mengambil tren laporan bulanan (6 bulan terakhir) 
         $monthlyTrend = Report::select(
             DB::raw('count(id) as total'),
             DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month")
@@ -58,30 +58,24 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
-        // Matriks Prioritas Wilayah (Kecamatan dengan laporan + upvote terbanyak)
+        // Mengambil kecamatan prioritas (Kecamatan dengan laporan + upvote terbanyak)
         $priorityDistricts = District::withCount('reports')
             ->orderBy('reports_count', 'desc')
             ->take(5)
             ->get();
 
-        return view('admin.dashboard', compact(
-            'totalReports',
-            'pendingReports',
-            'inProgressReports',
-            'resolvedReports',
-            'monthlyTrend',
-            'priorityDistricts'
-        ));
+        return view('admin.dashboard', compact('totalReports', 'pendingReports', 'inProgressReports', 'resolvedReports', 'monthlyTrend', 'priorityDistricts'));
     }
 
-    // Landing Page / Welcome Page: Menampilkan statistik global
+    // Landing Page
     public function welcome()
     {
-        // Admin langsung ke dashboard admin, tidak perlu melihat landing page
+        // Redirect admin ke dashboard admin
         if (Auth::check() && Auth::user()->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
+        // Mengambil statistik untuk landing page
         $totalReports = Report::count();
         $inProgressReports = Report::where('status', Report::STATUS_IN_PROGRESS)->count();
         $resolvedReports = Report::where('status', Report::STATUS_RESOLVED)->count();
