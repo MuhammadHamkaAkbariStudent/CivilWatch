@@ -139,12 +139,19 @@ class ReportController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $query = Report::with(['user', 'district'])
-            ->whereIn('status', [
-                Report::STATUS_PUBLISHED,
-                Report::STATUS_IN_PROGRESS,
-                Report::STATUS_RESOLVED
-            ])->withCount('upvotes');
+        $statusFilter = $request->input('status');
+        if (in_array($statusFilter, [Report::STATUS_PUBLISHED, Report::STATUS_IN_PROGRESS, Report::STATUS_RESOLVED])) {
+            $query = Report::with(['user', 'district'])
+                ->where('status', $statusFilter)
+                ->withCount('upvotes');
+        } else {
+            $query = Report::with(['user', 'district'])
+                ->whereIn('status', [
+                    Report::STATUS_PUBLISHED,
+                    Report::STATUS_IN_PROGRESS,
+                    Report::STATUS_RESOLVED
+                ])->withCount('upvotes');
+        }
 
         if ($request->has('search') && $request->search != '') {
             $query->where('title', 'ilike', '%' . $request->search . '%');
@@ -154,7 +161,16 @@ class ReportController extends Controller
             $query->where('district_id', $request->district_id);
         }
 
-        $reports = $query->latest()->paginate(12);
+        // Urutan berdasarkan Upvote Terbanyak vs Terbaru vs Tersedikit
+        if ($request->has('sort_by') && $request->sort_by === 'upvotes') {
+            $query->orderBy('upvotes_count', 'desc');
+        } elseif ($request->has('sort_by') && $request->sort_by === 'least_upvotes') {
+            $query->orderBy('upvotes_count', 'asc');
+        } else {
+            $query->latest();
+        }
+
+        $reports = $query->paginate(12);
         $districts = District::all();
 
         return view('feed', compact('reports', 'districts'));
@@ -201,9 +217,11 @@ class ReportController extends Controller
             $query->where('district_id', $request->district_id);
         }
 
-        // Filter 4: Urutan berdasarkan Upvote Terbanyak (Prioritas) vs Terbaru
+        // Filter 4: Urutan berdasarkan Upvote Terbanyak (Prioritas) vs Terbaru vs Tersedikit
         if ($request->has('sort_by') && $request->sort_by === 'upvotes') {
             $query->orderBy('upvotes_count', 'desc');
+        } elseif ($request->has('sort_by') && $request->sort_by === 'least_upvotes') {
+            $query->orderBy('upvotes_count', 'asc');
         } else {
             $query->latest();
         }

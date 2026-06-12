@@ -24,13 +24,14 @@
         <div class="card">
             <div class="card-header">
                 <div class="card-title">Detail Laporan</div>
-                <div style="font-size:13px;color:var(--text-muted);">Kolom dengan tanda <span style="color:var(--danger)">*</span> wajib diisi</div>
+                <div style="font-size:13px;color:var(--text-muted);">Silakan lengkapi formulir di bawah ini</div>
             </div>
             <div class="card-body">
                 <form
                     method="POST"
                     action="{{ route('citizen.reports.store') }}"
                     enctype="multipart/form-data"
+                    novalidate
                     x-data="{
                         previewUrl: null,
                         handleFile(e) {
@@ -50,37 +51,9 @@
                 >
                     @csrf
 
-                    <!-- CLASSIFICATION -->
-                    <div class="form-group">
-                        <label class="form-label">Klasifikasi Laporan <span>*</span></label>
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-
-                            @php
-                            $categories = [
-                                ['label' => 'Infrastruktur Jalan',],
-                                ['label' => 'Penerangan',],
-                                ['label' => 'Drainase',],
-                                ['label' => 'Taman & RTH',],
-                                ['label' => 'Trotoar',],
-                                ['label' => 'Lainnya',],
-                            ];
-                            @endphp
-
-                            @foreach($categories as $cat)
-                            <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-                                <input type="radio" name="_category_hint" value="{{ $cat['label'] }}" style="accent-color:var(--primary);">
-                                <span style="display:inline-flex;align-items:center;gap:5px;font-size:13px;">
-                                    {{ $cat['label'] }}
-                                </span>
-                            </label>
-                            @endforeach
-
-                        </div>
-                    </div>
-
                     <!-- TITLE -->
                     <div class="form-group">
-                        <label class="form-label" for="title">Judul Laporan <span>*</span></label>
+                        <label class="form-label" for="title">Judul Laporan</label>
                         <input
                             id="title"
                             type="text"
@@ -97,7 +70,7 @@
 
                     <!-- DESCRIPTION -->
                     <div class="form-group">
-                        <label class="form-label" for="description">Deskripsi Kronologis <span>*</span></label>
+                        <label class="form-label" for="description">Deskripsi Kronologis</label>
                         <textarea
                             id="description"
                             name="description"
@@ -111,21 +84,63 @@
 
                     <!-- DISTRICT -->
                     <div class="form-group">
-                        <label class="form-label" for="district_id">Lokasi / Kecamatan <span>*</span></label>
-                        <select id="district_id" name="district_id" class="form-select" required>
-                            <option value="">-- Pilih Kecamatan --</option>
-                            @foreach($districts as $d)
-                                <option value="{{ $d->id }}" {{ old('district_id') == $d->id ? 'selected' : '' }}>
+                        <label class="form-label" for="district_id">Lokasi / Kecamatan</label>
+                        <div
+                            x-data="{
+                                open: false,
+                                selected: '{{ old('district_id') }}',
+                                selectedLabel: '{{ $districts->firstWhere('id', old('district_id'))?->name ?? '-- Pilih Kecamatan --' }}'
+                            }"
+                            class="cw-select-wrapper"
+                            style="position:relative;"
+                            @click.outside="open = false"
+                        >
+                            <input type="hidden" name="district_id" :value="selected">
+                            
+                            <button
+                                type="button"
+                                class="cw-select-trigger"
+                                @click="open = !open"
+                                :class="{ 'cw-select-trigger--open': open }"
+                                style="width:100%; display:flex; align-items:center; justify-content:space-between;"
+                            >
+                                <span x-text="selectedLabel"></span>
+                                <svg class="cw-select-chevron" :class="{ 'rotated': open }"
+                                    width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                    <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+
+                            <x-scrollable as="ul" class="cw-select-dropdown" maxHeight="200px" paddingRight="0px" x-show="open" x-transition style="width:100%;">
+                                <li
+                                    class="cw-select-option"
+                                    :class="{ 'cw-select-option--active': selected === '' }"
+                                    @click="selected = ''; selectedLabel = '-- Pilih Kecamatan --'; open = false"
+                                    @mouseenter="$el.classList.add('cw-select-option--hover')"
+                                    @mouseleave="$el.classList.remove('cw-select-option--hover')"
+                                >
+                                    -- Pilih Kecamatan --
+                                </li>
+                                @foreach($districts as $d)
+                                <li
+                                    class="cw-select-option"
+                                    :class="{ 'cw-select-option--active': selected === '{{ $d->id }}' }"
+                                    @click="selected = '{{ $d->id }}'; selectedLabel = '{{ $d->name }}'; open = false"
+                                    @mouseenter="$el.classList.add('cw-select-option--hover')"
+                                    @mouseleave="$el.classList.remove('cw-select-option--hover')"
+                                >
                                     {{ $d->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('district_id')<div class="form-error">{{ $message }}</div>@enderror
+                                </li>
+                                @endforeach
+                            </x-scrollable>
+                        </div>
+                        @error('district_id')<div class="form-error" style="margin-top:4px;">{{ $message }}</div>@enderror
                     </div>
 
                     <!-- PHOTO UPLOAD -->
                     <div class="form-group">
-                        <label class="form-label">Foto Bukti Kerusakan <span>*</span></label>
+                        <label class="form-label">Foto Bukti Kerusakan <span style="font-weight:normal;color:var(--text-muted);font-size:12.5px;margin-left:4px;">(Opsional)</span></label>
 
                         <!-- Preview Area -->
                         <div x-show="previewUrl" style="margin-bottom:12px;position:relative;">
@@ -163,7 +178,6 @@
                                 accept=".jpg,.jpeg,.png"
                                 @change="handleFile($event)"
                                 style="display:none;"
-                                required
                             >
                         </label>
                         @error('photo')<div class="form-error">{{ $message }}</div>@enderror

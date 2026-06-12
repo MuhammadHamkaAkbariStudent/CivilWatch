@@ -9,32 +9,10 @@
 </head>
 <body class="bg-grid">
 
-{{-- ═══ NAV ═══ --}}
-<nav class="pub-nav">
-    <div class="pub-nav-inner">
-        <a href="{{ route('home') }}" class="pub-brand">
-            <span class="pub-brand-text">CivilWatch</span>
-        </a>
-        <div class="pub-nav-links">
-            <a href="{{ route('home') }}" class="pub-nav-link">Beranda</a>
-            <a href="{{ route('feed') }}" class="pub-nav-link active">Public Feed</a>
-        </div>
-        <div class="pub-nav-auth">
-            @auth
-                @if(Auth::user()->role === 'citizen')
-                    <a href="{{ route('citizen.dashboard') }}"      class="pub-nav-btn pub-nav-btn-outline">Dashboard</a>
-                    <a href="{{ route('citizen.reports.create') }}" class="pub-nav-btn pub-nav-btn-primary">Buat Laporan</a>
-                @endif
-            @else
-                <a href="{{ route('login') }}"    class="pub-nav-btn pub-nav-btn-outline">Masuk</a>
-                <a href="{{ route('register') }}" class="pub-nav-btn pub-nav-btn-primary">Daftar</a>
-            @endauth
-        </div>
-    </div>
-</nav>
+<x-public-nav active="feed" />
 
 {{-- ═══ FEED CONTENT ═══ --}}
-<div style="max-width:1280px;margin:0 auto;padding:32px;">
+<div style="max-width:1200px;margin:0 auto;padding:32px;">
 
     {{-- Page Header --}}
     <div class="page-header">
@@ -87,7 +65,7 @@
                 </button>
 
                 {{-- Dropdown list --}}
-                <ul class="cw-select-dropdown" x-show="open" x-transition>
+                <x-scrollable as="ul" class="cw-select-dropdown" maxHeight="200px" paddingRight="0px" x-show="open" x-transition>
                     <li
                         class="cw-select-option"
                         :class="{ 'cw-select-option--active': selected === '' }"
@@ -106,7 +84,48 @@
                         {{ $d->name }}
                     </li>
                     @endforeach
-                </ul>
+                </x-scrollable>
+            </div>
+
+            <div
+                x-data="{
+                    open: false,
+                    selected: '{{ request('sort_by', 'latest') }}',
+                    options: [
+                        { value: 'latest',  label: 'Terbaru' },
+                        { value: 'upvotes', label: 'Upvote Terbanyak' },
+                        { value: 'least_upvotes', label: 'Upvote Tersedikit' }],
+                    get selectedLabel() {
+                        return this.options.find(o => o.value === this.selected)?.label ?? 'Terbaru'}
+                }"
+                class="cw-select-wrapper"
+                @click.outside="open = false">
+    
+                <input type="hidden" name="sort_by" :value="selected">
+
+                <button
+                    type="button"
+                    class="cw-select-trigger"
+                    @click="open = !open"
+                    :class="{ 'cw-select-trigger--open': open }">
+                    <span x-text="selectedLabel"></span>
+                    <svg class="cw-select-chevron" :class="{ 'rotated': open }"
+                        width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+
+                <x-scrollable as="ul" class="cw-select-dropdown" maxHeight="200px" paddingRight="0px" x-show="open" x-transition>
+                    <template x-for="opt in options" :key="opt.value">
+                        <li
+                            class="cw-select-option"
+                            :class="{ 'cw-select-option--active': selected === opt.value }"
+                            @click="selected = opt.value; open = false"
+                            x-text="opt.label">
+                        </li>
+                    </template>
+                </x-scrollable>
             </div>
 
             <button type="submit" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;">
@@ -114,7 +133,7 @@
                 Terapkan Filter
             </button>
 
-            @if(request('search') || request('district_id'))
+            @if(request('search') || request('district_id') || request('sort_by'))
                 <a href="{{ route('feed') }}" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     Reset
@@ -122,6 +141,68 @@
             @endif
         </div>
     </form>
+
+    {{-- Status Tabs (Pill Buttons) --}}
+    @php
+        $feedTabs = [
+            [
+                'value' => '',
+                'label' => 'Semua Laporan',
+                'icon'  => '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>',
+                'bg'    => 'var(--primary)',
+            ],
+            [
+                'value' => 'published',
+                'label' => 'Diterima',
+                'icon'  => '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+                'bg'    => 'var(--info)',
+            ],
+            [
+                'value' => 'in_progress',
+                'label' => 'Diproses',
+                'icon'  => '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>',
+                'bg'    => 'var(--danger)',
+            ],
+            [
+                'value' => 'resolved',
+                'label' => 'Selesai',
+                'icon'  => '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+                'bg'    => 'var(--success)',
+            ],
+        ];
+        $activeFeedStatus = request('status', '');
+        $statusLabels = [
+            'published'   => 'Diterima',
+            'in_progress' => 'Diproses',
+            'resolved'    => 'Selesai',
+        ];
+    @endphp
+
+    <div style="display:flex;gap:12px;margin:24px 0 20px 0;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;-ms-overflow-style:none;" class="cw-scrollbar">
+        @foreach($feedTabs as $tab)
+            @php
+                $isActive = $activeFeedStatus === $tab['value'];
+                $url = route('feed', array_merge(request()->except(['status', 'page']), $tab['value'] ? ['status' => $tab['value']] : []));
+            @endphp
+            <a href="{{ $url }}"
+               style="
+                   display:inline-flex;align-items:center;gap:8px;
+                   padding:10px 20px;border-radius:100px;
+                   font-size:13.5px;font-weight:600;
+                   white-space:nowrap;transition:all 0.2s ease;
+                   border: 1.5px solid {{ $isActive ? $tab['bg'] : 'var(--border)' }};
+                   background: {{ $isActive ? $tab['bg'] : 'var(--surface)' }};
+                   color: {{ $isActive ? '#ffffff' : 'var(--text-muted)' }};
+                   box-shadow: {{ $isActive ? 'var(--shadow-sm)' : 'none' }};
+               "
+               onmouseover="if(!{{ $isActive ? 'true' : 'false' }}) { this.style.borderColor='{{ $tab['bg'] }}'; this.style.color='var(--text)'; }"
+               onmouseout="if(!{{ $isActive ? 'true' : 'false' }}) { this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'; }"
+            >
+                {!! $tab['icon'] !!}
+                {{ $tab['label'] }}
+            </a>
+        @endforeach
+    </div>
 
     {{-- Result Count --}}
     <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
@@ -131,6 +212,9 @@
         @endif
         @if(request('district_id') && ($matchDistrict = $districts->firstWhere('id', request('district_id'))))
             di <strong>{{ $matchDistrict->name }}</strong>
+        @endif
+        @if(request('status') && isset($statusLabels[request('status')]))
+            dengan status <strong>{{ $statusLabels[request('status')] }}</strong>
         @endif
     </p>
 
@@ -155,10 +239,12 @@
             @endphp
 
             <a href="{{ route('reports.show', $report->id) }}" class="report-card">
+                @if($report->image)
                 <img src="{{ asset('storage/'.$report->image) }}"
                      alt="{{ $report->title }}"
                      class="rc-img"
                      style="height:176px;object-fit:cover;">
+                @endif
 
                 <div class="rc-body">
                     <div class="rc-meta">
@@ -222,7 +308,7 @@
             </div>
             <div class="empty-state-title">Tidak Ada Laporan Ditemukan</div>
             <div class="empty-state-desc">Coba ubah kata kunci pencarian atau pilih kecamatan yang berbeda.</div>
-            @if(request('search') || request('district_id'))
+            @if(request('search') || request('district_id') || request('sort_by') || request('status'))
                 <a href="{{ route('feed') }}" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     Reset Filter

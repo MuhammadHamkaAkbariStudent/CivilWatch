@@ -2,11 +2,11 @@
     <div class="auth-form-title">Daftar Akun Baru</div>
     <div class="auth-form-sub">Bergabunglah dan mulai laporkan masalah infrastruktur di sekitar Anda</div>
 
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}" novalidate>
         @csrf
 
         <div class="form-group">
-            <label class="form-label" for="name">Nama Lengkap <span style="color:#EF4444">*</span></label>
+            <label class="form-label" for="name">Nama Lengkap</label>
             <input
                 id="name"
                 class="form-input"
@@ -22,7 +22,7 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="email">Alamat Email <span style="color:#EF4444">*</span></label>
+            <label class="form-label" for="email">Alamat Email</label>
             <input
                 id="email"
                 class="form-input"
@@ -38,7 +38,7 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="password">Kata Sandi <span style="color:#EF4444">*</span></label>
+            <label class="form-label" for="password">Kata Sandi</label>
             <input
                 id="password"
                 class="form-input"
@@ -53,7 +53,7 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label" for="password_confirmation">Konfirmasi Kata Sandi <span style="color:#EF4444">*</span></label>
+            <label class="form-label" for="password_confirmation">Konfirmasi Kata Sandi</label>
             <input
                 id="password_confirmation"
                 class="form-input"

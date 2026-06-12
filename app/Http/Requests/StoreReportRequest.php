@@ -27,7 +27,7 @@ class StoreReportRequest extends FormRequest
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
             'district_id' => 'required|exists:districts,id',
-            'photo'       => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'photo'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
     }
 }

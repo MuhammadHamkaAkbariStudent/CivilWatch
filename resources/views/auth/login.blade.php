@@ -7,7 +7,7 @@
         <div class="alert alert-success" style="margin-bottom:16px">{{ session('status') }}</div>
     @endif
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" novalidate>
         @csrf
 
         <div class="form-group">
