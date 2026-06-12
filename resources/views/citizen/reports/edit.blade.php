@@ -40,9 +40,11 @@
                     method="POST"
                     action="{{ route('citizen.reports.update', $report->id) }}"
                     enctype="multipart/form-data"
+                    novalidate
                     x-data="{
                         previewUrl: {{ $report->image ? '\'' . asset('storage/'.$report->image) . '\'' : 'null' }},
                         hasNewFile: false,
+                        showModal: false,
                         handleFile(e) {
                             const file = e.target.files[0];
                             if (!file) return;
@@ -63,7 +65,7 @@
 
                     <!-- TITLE -->
                     <div class="form-group">
-                        <label class="form-label" for="title">Judul Laporan <span>*</span></label>
+                        <label class="form-label" for="title">Judul Laporan</label>
                         <input
                             id="title"
                             type="text"
@@ -80,7 +82,7 @@
 
                     <!-- DESCRIPTION -->
                     <div class="form-group">
-                        <label class="form-label" for="description">Deskripsi Kronologis <span>*</span></label>
+                        <label class="form-label" for="description">Deskripsi Kronologis</label>
                         <textarea
                             id="description"
                             name="description"
@@ -94,7 +96,7 @@
 
                     <!-- DISTRICT -->
                     <div class="form-group">
-                        <label class="form-label" for="district_id">Lokasi / Kecamatan <span>*</span></label>
+                        <label class="form-label" for="district_id">Lokasi / Kecamatan</label>
                         @if(!$report->isEditable())
                             {{-- If not editable, show read-only button and static label --}}
                             <div class="cw-select-wrapper">
@@ -164,7 +166,36 @@
                         <div style="margin-bottom:12px;">
                             <!-- Current / Preview -->
                             <div x-show="previewUrl" style="position:relative;margin-bottom:10px;">
-                                <img :src="previewUrl" style="width:100%;max-height:240px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);" alt="Preview foto">
+                                <img
+                                    :src="previewUrl"
+                                    @click="showModal = true"
+                                    style="width:100%;max-height:240px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);cursor:zoom-in;"
+                                    alt="Preview foto"
+                                    title="Klik untuk memperbesar"
+                                >
+                                {{-- Lightbox --}}
+                                <div
+                                    x-show="showModal"
+                                    x-cloak
+                                    x-transition.opacity
+                                    @click="showModal = false"
+                                    @keydown.escape.window="showModal = false"
+                                    class="lightbox-overlay"
+                                    style="position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 9999; display: grid; place-items: center;">
+                                    <button
+                                        type="button"
+                                        @click.stop="showModal = false"
+                                        class="lightbox-close"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                    <img
+                                        :src="previewUrl"
+                                        alt="Zoomed preview"
+                                        @click.stop
+                                        style="max-width:90vw; max-height:90vh; width:auto; height:auto; margin:auto; display:block; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,.5); object-fit:contain;"
+                                    >
+                                </div>
                                 <div
                                     x-show="hasNewFile"
                                     style="position:absolute;top:8px;left:8px;background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:3px 9px;border-radius:12px;display:flex;align-items:center;gap:4px;"
@@ -240,7 +271,7 @@
                         </div>
                         <div>
                             <div style="font-size:11px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Dibuat</div>
-                            <div style="font-size:13px;font-family:'IBM Plex Mono',monospace;color:var(--text);">{{ $report->created_at->format('d M Y, H:i') }}</div>
+                            <div style="font-size:13px;font-family:'IBM Plex Mono',monospace;color:var(--text);">{{ $report->created_at->translatedFormat('d M Y, H:i') }}</div>
                         </div>
                         <div>
                             <div style="font-size:11px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Wilayah</div>

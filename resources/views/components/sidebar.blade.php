@@ -3,7 +3,11 @@
         <div class="logo-mark">
         </div>
         <div>
-            <div class="logo-text">CivilWatch</div>
+            @if(Auth::user() && Auth::user()->role === 'admin')
+                <div class="logo-text">CivilWatch</div>
+            @else
+                <a href="{{ route('home') }}" class="logo-text">CivilWatch</a>
+            @endif
             <div class="logo-sub">Pengaduan Infrastruktur</div>
         </div>
     </div>

@@ -6,6 +6,15 @@
         <span class="breadcrumb-current">Manajemen Laporan</span>
     </x-slot>
 
+    <style>
+        .data-table th {
+            background-color: #1e3a8a !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            border-bottom: 2px solid #172554 !important;
+        }
+    </style>
+
     <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
         <div>
             <div class="page-title" style="display:flex;align-items:center;gap:8px;">
@@ -158,7 +167,8 @@
                     selected: '{{ request('sort_by', 'latest') }}',
                     options: [
                         { value: 'latest',  label: 'Terbaru' },
-                        { value: 'upvotes', label: 'Upvote Terbanyak' }],
+                        { value: 'upvotes', label: 'Upvote Terbanyak' },
+                        { value: 'least_upvotes', label: 'Upvote Tersedikit' }],
                     get selectedLabel() {
                         return this.options.find(o => o.value === this.selected)?.label ?? 'Terbaru'}
                 }"
@@ -304,7 +314,7 @@
                         </td>
                         <td>
                             <div style="font-size:12.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-muted);">
-                                {{ $report->created_at->format('d M Y') }}
+                                {{ $report->created_at->translatedFormat('d M Y') }}
                             </div>
                             <div style="font-size:11px;color:var(--text-light);">
                                 {{ $report->created_at->diffForHumans() }}

@@ -69,7 +69,7 @@
                                 </span>
                             </td>
                             <td style="font-size:12.5px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;">
-                                {{ $district->created_at->format('d M Y') }}
+                                {{ $district->created_at->translatedFormat('d M Y') }}
                             </td>
                             <td>
                                 <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
@@ -176,7 +176,7 @@
                     <form method="POST" action="{{ route('admin.districts.store') }}">
                         @csrf
                         <div class="form-group">
-                            <label class="form-label">Nama Kecamatan <span>*</span></label>
+                            <label class="form-label">Nama Kecamatan</label>
                             <input
                                 type="text"
                                 name="name"
@@ -245,7 +245,7 @@
                     @csrf
                     @method('PUT')
                     <div class="form-group">
-                        <label class="form-label">Nama Kecamatan <span>*</span></label>
+                        <label class="form-label">Nama Kecamatan</label>
                         <input type="text" id="editName" name="name" class="form-input" required placeholder="Nama kecamatan">
                         @error('name')<div class="form-error">{{ $message }}</div>@enderror
                     </div>

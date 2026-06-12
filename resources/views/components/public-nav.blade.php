@@ -14,8 +14,8 @@
         @else
             <div class="pub-nav-links">
                 <a href="{{ route('home') }}" class="pub-nav-link {{ $active === 'home' ? 'active' : '' }}">Beranda</a>
-                <a href="{{ route('feed') }}" class="pub-nav-link {{ $active === 'feed' ? 'active' : '' }}">Public Feed</a>
                 <a href="{{ route('home') }}#cara-kerja" class="pub-nav-link">Cara Kerja</a>
+                <a href="{{ route('feed') }}" class="pub-nav-link {{ $active === 'feed' ? 'active' : '' }}">Public Feed</a>
             </div>
             <div class="pub-nav-auth">
                 @auth

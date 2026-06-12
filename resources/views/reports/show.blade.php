@@ -109,7 +109,7 @@
                     {{-- Initial event --}}
                     <div class="timeline-item">
                         <div class="timeline-dot dot-start"></div>
-                        <div class="timeline-date">{{ $report->created_at->format('d M Y, H:i') }}</div>
+                        <div class="timeline-date">{{ $report->created_at->translatedFormat('d M Y, H:i') }}</div>
                         <div class="timeline-content">
                             <div class="timeline-note" style="display:flex;align-items:flex-start;gap:7px;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -121,7 +121,7 @@
                     @forelse($report->progressUpdates as $update)
                     <div class="timeline-item">
                         <div class="timeline-dot {{ $loop->last ? 'dot-end' : 'dot-middle' }}"></div>
-                        <div class="timeline-date">{{ $update->created_at->format('d M Y, H:i') }}</div>
+                        <div class="timeline-date">{{ $update->created_at->translatedFormat('d M Y, H:i') }}</div>
                         <div class="timeline-content">
                             <div class="timeline-note">{{ $update->note }}</div>
                         </div>
@@ -209,7 +209,7 @@
                         <div style="font-size:11px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Tanggal Laporan</div>
                         <div style="font-size:13.5px;color:var(--text);font-weight:500;display:flex;align-items:center;gap:5px;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            {{ $report->created_at->format('d M Y') }}
+                            {{ $report->created_at->translatedFormat('d M Y') }}
                         </div>
                     </div>
 

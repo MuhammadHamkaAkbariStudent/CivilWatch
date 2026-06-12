@@ -596,7 +596,7 @@ body {
    EMPTY STATE
 ───────────────────────────────────────────── */
 .empty-state       { text-align: center; padding: 60px 20px; }
-.empty-state-icon  { font-size: 48px; margin-bottom: 16px; opacity: .45; display: block; }
+.empty-state-icon  { font-size: 48px; margin-bottom: 16px; opacity: .45; display: flex; justify-content: center; align-items: center; }
 .empty-state-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
 .empty-state-desc  { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; max-width: 360px; margin-left: auto; margin-right: auto; }
 
@@ -667,10 +667,10 @@ body {
    PUBLIC NAV (feed, welcome, reports/show)
 ───────────────────────────────────────────── */
 .pub-nav          { background: var(--primary); border-bottom: 1px solid rgba(255, 255, 255, 0.12); position: sticky; top: 0; z-index: 50; }
-.pub-nav-inner    { max-width: 1200px; margin: 0 auto; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+.pub-nav-inner    { max-width: 1200px; margin: 0 auto; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: relative; }
 .pub-brand        { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .pub-brand-text   { font-size: 17px; font-weight: 700; color: #ffffff; }
-.pub-nav-links    { display: flex; align-items: center; gap: 8px; margin-left: 85px; }
+.pub-nav-links    { display: flex; align-items: center; gap: 8px; position: absolute; left: 48%; transform: translateX(-50%); }
 .pub-nav-link     { font-size: 13.5px; font-weight: 500; color: rgba(255, 255, 255, 0.7); text-decoration: none; padding: 7px 14px; border-radius: 7px; transition: var(--transition); }
 .pub-nav-link:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
 .pub-nav-link.active { background: rgba(255, 255, 255, 0.12); color: #ffffff; }

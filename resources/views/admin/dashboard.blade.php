@@ -159,7 +159,7 @@
                     </svg>
                     Tren Laporan 6 Bulan Terakhir
                 </div>
-                <a href="{{ route('admin.reports.index') }}" class="btn btn-outline btn-sm" style="background:var(--surface);color:var(--text);">Lihat Semua</a>
+                <a href="{{ route('admin.reports.index') }}" class="btn btn-outline btn-sm" style="background:var(--surface);color:var(--primary);">Lihat Semua</a>
             </div>
             <div class="card-body" style="padding:20px 24px;">
                 @if($monthlyTrend->count() > 0)
@@ -209,7 +209,7 @@
                     </svg>
                     Prioritas Wilayah
                 </div>
-                <a href="{{ route('admin.districts.index') }}" class="btn btn-outline btn-sm" style="background:var(--surface);color:var(--text);">Kelola</a>
+                <a href="{{ route('admin.districts.index') }}" class="btn btn-outline btn-sm" style="background:var(--surface);color:var(--primary);">Kelola</a>
             </div>
             <div class="card-body" style="padding:20px 24px;">
                 @if($priorityDistricts->count() > 0)

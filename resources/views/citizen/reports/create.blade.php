@@ -24,13 +24,14 @@
         <div class="card">
             <div class="card-header">
                 <div class="card-title">Detail Laporan</div>
-                <div style="font-size:13px;color:var(--text-muted);">Kolom dengan tanda <span style="color:var(--danger)">*</span> wajib diisi</div>
+                <div style="font-size:13px;color:var(--text-muted);">Silakan lengkapi formulir di bawah ini</div>
             </div>
             <div class="card-body">
                 <form
                     method="POST"
                     action="{{ route('citizen.reports.store') }}"
                     enctype="multipart/form-data"
+                    novalidate
                     x-data="{
                         previewUrl: null,
                         handleFile(e) {
@@ -52,7 +53,7 @@
 
                     <!-- TITLE -->
                     <div class="form-group">
-                        <label class="form-label" for="title">Judul Laporan <span>*</span></label>
+                        <label class="form-label" for="title">Judul Laporan</label>
                         <input
                             id="title"
                             type="text"
@@ -69,7 +70,7 @@
 
                     <!-- DESCRIPTION -->
                     <div class="form-group">
-                        <label class="form-label" for="description">Deskripsi Kronologis <span>*</span></label>
+                        <label class="form-label" for="description">Deskripsi Kronologis</label>
                         <textarea
                             id="description"
                             name="description"
@@ -83,7 +84,7 @@
 
                     <!-- DISTRICT -->
                     <div class="form-group">
-                        <label class="form-label" for="district_id">Lokasi / Kecamatan <span>*</span></label>
+                        <label class="form-label" for="district_id">Lokasi / Kecamatan</label>
                         <div
                             x-data="{
                                 open: false,
