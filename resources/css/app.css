@@ -666,7 +666,8 @@ body {
 /* ─────────────────────────────────────────────
    PUBLIC NAV (feed, welcome, reports/show)
 ───────────────────────────────────────────── */
-.pub-nav          { background: var(--primary); border-bottom: 1px solid rgba(255, 255, 255, 0.12); position: sticky; top: 0; z-index: 50; }
+.pub-nav          { background: var(--primary); border-bottom: 1px solid rgba(255, 255, 255, 0.12); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+.pub-nav + *      { margin-top: 64px !important; }
 .pub-nav-inner    { max-width: 1200px; margin: 0 auto; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: relative; }
 .pub-brand        { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .pub-brand-text   { font-size: 17px; font-weight: 700; color: #ffffff; }
