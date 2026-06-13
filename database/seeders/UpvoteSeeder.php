@@ -12,7 +12,7 @@ class UpvoteSeeder extends Seeder
     {
         $citizens = User::where('role', 'citizen')->get();
 
-        // Only reports that are verified and visible on the Public Feed
+        // Only reports that are verified and visible on the Laporan Publik
         $reportJalan    = Report::where('title', 'Jalan Berlubang di Depan SDN 1')->first();
         $reportPohon    = Report::where('title', 'Pohon Tumbang Menutup Akses Jalan')->first();
         $reportLampu    = Report::where('title', 'Lampu Jalan Mati Sepanjang 200 Meter')->first();

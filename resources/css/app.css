@@ -597,6 +597,7 @@ body {
 ───────────────────────────────────────────── */
 .empty-state       { text-align: center; padding: 60px 20px; }
 .empty-state-icon  { font-size: 48px; margin-bottom: 16px; opacity: .45; display: flex; justify-content: center; align-items: center; }
+.empty-state-icon svg { margin: 0 auto; }
 .empty-state-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
 .empty-state-desc  { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; max-width: 360px; margin-left: auto; margin-right: auto; }
 
@@ -639,7 +640,7 @@ body {
 .auth-hero-title span { color: var(--accent); }
 .auth-hero-desc      { font-size: 15px; color: rgba(255,255,255,.65); line-height: 1.7; margin-bottom: 32px; }
 
-.auth-stats      { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; position: relative; z-index: 1; }
+.auth-stats      { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; position: relative; z-index: 1; }
 .auth-stat       { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 16px; }
 .auth-stat-value { font-size: 24px; font-weight: 700; color: #fff; font-family: 'IBM Plex Mono', monospace; }
 .auth-stat-label { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 3px; }

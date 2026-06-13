@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use App\Models\Report;
+use App\Models\District;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -83,3 +85,38 @@ test('correct password must be provided to delete account', function () {
 
     $this->assertNotNull($user->fresh());
 });
+
+test('deleting user account keeps their reports but sets user_id to null', function () {
+    $user = User::factory()->create();
+    
+    // Create a district first
+    $district = District::create(['name' => 'Kecamatan Test']);
+
+    // Create a report by this user
+    $report = Report::create([
+        'user_id' => $user->id,
+        'district_id' => $district->id,
+        'title' => 'Laporan Test Anonymization',
+        'description' => 'Ini deskripsi laporan test.',
+        'status' => 'pending',
+    ]);
+
+    // Act as the user and delete the profile
+    $response = $this
+        ->actingAs($user)
+        ->delete('/profile', [
+            'password' => 'password',
+        ]);
+
+    $response->assertRedirect('/');
+
+    // Assert user is deleted
+    $this->assertNull($user->fresh());
+
+    // Assert report is still in database and has user_id set to null
+    $report->refresh();
+    $this->assertNotNull($report);
+    $this->assertNull($report->user_id);
+    $this->assertSame('Laporan Test Anonymization', $report->title);
+});
+
