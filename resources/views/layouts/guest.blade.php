@@ -58,16 +58,12 @@
 
         <div class="auth-stats">
             <div class="auth-stat">
-                <div class="auth-stat-value">24H+</div>
-                <div class="auth-stat-label">Waktu Operasional</div>
+                <div class="auth-stat-value">24 Jam</div>
+                <div class="auth-stat-label">Akses Pengaduan</div>
             </div>
             <div class="auth-stat">
-                <div class="auth-stat-value">700+</div>
-                <div class="auth-stat-label">Instansi</div>
-            </div>
-            <div class="auth-stat">
-                <div class="auth-stat-value">34</div>
-                <div class="auth-stat-label">Provinsi</div>
+                <div class="auth-stat-value">100%</div>
+                <div class="auth-stat-label">Gratis Tanpa Biaya</div>
             </div>
         </div>
     </div>

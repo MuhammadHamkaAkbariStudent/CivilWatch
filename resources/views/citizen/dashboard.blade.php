@@ -34,7 +34,7 @@
             </div>
             <div class="stat-label">Laporan Diverifikasi</div>
             <div class="stat-value">{{ $myVerified }}</div>
-            <div class="stat-sub">Sudah tayang di public feed</div>
+            <div class="stat-sub">Sudah tayang di Laporan Publik</div>
         </div>
         <div class="stat-card s-orange">
             <div class="stat-icon s-orange">

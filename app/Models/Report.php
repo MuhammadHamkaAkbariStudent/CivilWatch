@@ -11,6 +11,18 @@ class Report extends Model
     use HasFactory;
 
     /**
+     * Boot the model.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Report $report) {
+            if ($report->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($report->image);
+            }
+        });
+    }
+
+    /**
      * Kolom yang boleh diisi secara massal.
      */
     protected $fillable = [
@@ -44,7 +56,7 @@ class Report extends Model
     }
 
     /**
-     * Cek apakah laporan ini sudah terverifikasi dan tampil di Public Feed.
+     * Cek apakah laporan ini sudah terverifikasi dan tampil di Laporan Publik.
      */
     public function isVerified(): bool
     {

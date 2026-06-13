@@ -34,6 +34,7 @@
                     novalidate
                     x-data="{
                         previewUrl: null,
+                        showLightbox: false,
                         handleFile(e) {
                             const file = e.target.files[0];
                             if (!file) return;
@@ -142,17 +143,19 @@
                     <div class="form-group">
                         <label class="form-label">Foto Bukti Kerusakan <span style="font-weight:normal;color:var(--text-muted);font-size:12.5px;margin-left:4px;">(Opsional)</span></label>
 
-                        <!-- Preview Area -->
+                         <!-- Preview Area -->
                         <div x-show="previewUrl" style="margin-bottom:12px;position:relative;">
                             <img
                                 :src="previewUrl"
-                                style="width:100%;max-height:260px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);"
+                                @click="showLightbox = true"
+                                style="width:100%;max-height:260px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);cursor:zoom-in;"
                                 alt="Preview foto"
+                                title="Klik untuk memperbesar"
                             >
                             <button
                                 type="button"
                                 @click="previewUrl=null; $refs.photoInput.value=''"
-                                style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;"
+                                style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;"
                             >
                                 <!-- X close -->
                                 <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round">
@@ -160,6 +163,30 @@
                                     <line x1="6"  y1="6" x2="18" y2="18"/>
                                 </svg>
                             </button>
+
+                            {{-- Lightbox --}}
+                            <div
+                                x-show="showLightbox"
+                                x-cloak
+                                x-transition.opacity
+                                @click.stop="showLightbox = false"
+                                @keydown.escape.window="showLightbox = false"
+                                class="lightbox-overlay"
+                                style="position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 9999; display: grid; place-items: center;">
+                                <button
+                                    type="button"
+                                    @click.stop="showLightbox = false"
+                                    class="lightbox-close"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                                <img
+                                    :src="previewUrl"
+                                    alt="Zoomed preview"
+                                    @click.stop
+                                    style="max-width:90vw; max-height:90vh; width:auto; height:auto; margin:auto; display:block; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,.5); object-fit:contain;"
+                                >
+                            </div>
                         </div>
 
                         <!-- Upload Zone -->
@@ -211,7 +238,7 @@
                     </svg>
                     Status Awal: Menunggu
                 </div>
-                <div style="font-size:12.5px;color:#B45309;line-height:1.6;">Laporan baru Anda akan berstatus <strong>Pending</strong> dan belum tampil di public feed hingga diverifikasi admin.</div>
+                <div style="font-size:12.5px;color:#B45309;line-height:1.6;">Laporan baru Anda akan berstatus <strong>Pending</strong> dan belum tampil di Laporan Publik hingga diverifikasi admin.</div>
             </div>
         </div>
 

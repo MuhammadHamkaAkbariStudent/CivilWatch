@@ -1,25 +1,37 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+    <div class="auth-form-title">Lupa Kata Sandi?</div>
+    <div class="auth-form-sub">Masukkan email Anda dan kami akan mengirimkan link untuk mengatur ulang kata sandi Anda.</div>
 
     <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if(session('status'))
+        <div class="alert alert-success" style="margin-bottom:16px">{{ session('status') }}</div>
+    @endif
 
-    <form method="POST" action="{{ route('password.email') }}">
+    <form method="POST" action="{{ route('password.email') }}" novalidate>
         @csrf
 
         <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="form-group">
+            <label class="form-label" for="email">Alamat Email</label>
+            <input
+                id="email"
+                class="form-input"
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+                placeholder="warga@email.com"
+                required autofocus
+            >
+            @error('email')
+                <div class="form-error">{{ $message }}</div>
+            @enderror
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="btn-auth" style="margin-top: 16px;">Kirim Link Reset Password</button>
     </form>
+
+    <div class="auth-footer">
+        Kembali ke halaman
+        <a href="{{ route('login') }}" class="auth-link">Masuk</a>
+    </div>
 </x-guest-layout>

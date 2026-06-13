@@ -11,8 +11,9 @@ return new class extends Migration
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')
+                  ->nullable()
                   ->constrained()
-                  ->onDelete('cascade');     // Laporan ikut terhapus jika user dihapus
+                  ->onDelete('set null');    // Laporan tetap ada (menjadi anonim) jika user dihapus
             $table->foreignId('district_id')
                   ->constrained()
                   ->onDelete('restrict');    // District tidak bisa dihapus jika masih ada laporan

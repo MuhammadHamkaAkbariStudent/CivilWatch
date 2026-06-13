@@ -131,7 +131,7 @@ class ReportController extends Controller
     }
 
     // AKSES PUBLIK (PENGUNJUNG UMUM)
-    // Menampilkan Public Feed dengan sistem Filter Kecamatan dan Search (Halaman 5).
+    // Menampilkan Laporan Publik dengan sistem Filter Kecamatan dan Search (Halaman 5).
     public function publicFeed(Request $request)
     {
         // Admin tidak memiliki akses ke halaman publik, langsung redirect ke dashboard admin
