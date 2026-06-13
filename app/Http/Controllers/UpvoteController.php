@@ -8,10 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class UpvoteController extends Controller
 {
-    /**
-     * Menambahkan atau menghapus upvote (toggle).
-     * Wajib merespon JSON jika expectsJson() — untuk Alpine.js AJAX.
-     */
+    // Menambahkan atau menghapus upvote
     public function toggle(Request $request, string $id)
     {
         // Cari laporan berdasarkan ID
@@ -20,7 +17,7 @@ class UpvoteController extends Controller
         // Ambil user yang sedang login
         $user = Auth::user();
 
-        // Jika laporan sudah ditangani (resolved), tidak bisa di-upvote lagi
+        // Jika laporan sudah ditangani, tidak bisa di-upvote lagi
         if ($report->status === Report::STATUS_RESOLVED) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -30,9 +27,7 @@ class UpvoteController extends Controller
             return back()->with('error', 'Laporan yang sudah selesai ditangani tidak dapat didukung lagi.');
         }
 
-        // Fitur Many-to-Many Toggle: 
-        // Jika user belum upvote, maka akan ditambahkan. 
-        // Jika sudah upvote, maka akan dihapus (un-vote).
+        // Mengubah status upvote
         $report->upvotes()->toggle($user->id);
 
         // Hitung ulang total upvote setelah toggle

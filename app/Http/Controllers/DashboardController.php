@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\District;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -15,10 +14,10 @@ class DashboardController extends Controller
     {
         $userId = Auth::id();
 
-        // Total Laporanku
+        // Menghitung total laporan user
         $myTotal = Report::where('user_id', $userId)->count();
 
-        // Laporan Diverifikasi (status: published, in_progress, atau resolved)
+        // Menghitung laporan yang sudah diverifikasi
         $myVerified = Report::where('user_id', $userId)
             ->whereIn('status', [
                 Report::STATUS_PUBLISHED,
@@ -26,12 +25,12 @@ class DashboardController extends Controller
                 Report::STATUS_RESOLVED,
             ])->count();
 
-        // Total Upvote yang Saya Berikan (ke laporan orang lain)
+        // Menghitung total upvote yang diberikan
         $myUpvotesGiven = DB::table('upvotes')
             ->where('user_id', $userId)
             ->count();
 
-        // Daftar Laporan Pribadi (termasuk status pending/rejected)
+        // Mengambil daftar laporan pribadi
         $reports = Report::with('district')
             ->where('user_id', $userId)
             ->orderBy('created_at', 'desc')
@@ -43,13 +42,13 @@ class DashboardController extends Controller
     // Dashboard Admin
     public function admin()
     {
-        // Matriks Eksekutif Global
+        // Menghitung statistik laporan global
         $totalReports = Report::count();
         $pendingReports = Report::where('status', Report::STATUS_PENDING)->count();
         $inProgressReports = Report::where('status', Report::STATUS_IN_PROGRESS)->count();
         $resolvedReports = Report::where('status', Report::STATUS_RESOLVED)->count();
 
-        // Tren Bulanan (6 bulan terakhir) — PostgreSQL syntax dengan TO_CHAR
+        // Mengambil tren laporan bulanan (6 bulan terakhir) 
         $monthlyTrend = Report::select(
             DB::raw('count(id) as total'),
             DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month")
@@ -59,30 +58,24 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
-        // Matriks Prioritas Wilayah (Kecamatan dengan laporan + upvote terbanyak)
+        // Mengambil kecamatan prioritas (Kecamatan dengan laporan + upvote terbanyak)
         $priorityDistricts = District::withCount('reports')
             ->orderBy('reports_count', 'desc')
             ->take(5)
             ->get();
 
-        return view('admin.dashboard', compact(
-            'totalReports',
-            'pendingReports',
-            'inProgressReports',
-            'resolvedReports',
-            'monthlyTrend',
-            'priorityDistricts'
-        ));
+        return view('admin.dashboard', compact('totalReports', 'pendingReports', 'inProgressReports', 'resolvedReports', 'monthlyTrend', 'priorityDistricts'));
     }
 
-    // Landing Page / Welcome Page: Menampilkan statistik global
+    // Landing Page
     public function welcome()
     {
-        // Admin langsung ke dashboard admin, tidak perlu melihat landing page
+        // Redirect admin ke dashboard admin
         if (Auth::check() && Auth::user()->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
+        // Mengambil statistik untuk landing page
         $totalReports = Report::count();
         $inProgressReports = Report::where('status', Report::STATUS_IN_PROGRESS)->count();
         $resolvedReports = Report::where('status', Report::STATUS_RESOLVED)->count();

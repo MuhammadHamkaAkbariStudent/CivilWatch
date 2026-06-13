@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    // Menampilkan form profil user
+    // Menampilkan form edit profil user
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -19,7 +19,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    // Memperbarui informasi profil user
+    // Memperbarui data profil user
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $validated = $request->validated();
