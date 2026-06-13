@@ -45,7 +45,7 @@
 
             <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
                 <div style="font-size:12px; color:var(--text-light); margin-bottom:6px;">Bergabung sejak</div>
-                <div style="font-size:13px; font-weight:500; color:var(--text);">{{ Auth::user()->created_at->format('d M Y') }}</div>
+                <div style="font-size:13px; font-weight:500; color:var(--text);">{{ Auth::user()->created_at->translatedFormat('d M Y') }}</div>
             </div>
         </div>
 
@@ -74,12 +74,12 @@
                         @method('PATCH')
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                             <div class="form-group" style="margin-bottom:0">
-                                <label class="form-label">Nama Lengkap <span style="color:var(--danger)">*</span></label>
+                                <label class="form-label">Nama Lengkap</label>
                                 <input type="text" name="name" class="form-input" value="{{ old('name', Auth::user()->name) }}" required>
                                 @error('name')<div class="form-error">{{ $message }}</div>@enderror
                             </div>
                             <div class="form-group" style="margin-bottom:0">
-                                <label class="form-label">Alamat Email <span style="color:var(--danger)">*</span></label>
+                                <label class="form-label">Alamat Email</label>
                                 <input type="email" name="email" class="form-input" value="{{ old('email', Auth::user()->email) }}" required>
                                 @error('email')<div class="form-error">{{ $message }}</div>@enderror
                             </div>

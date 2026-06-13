@@ -24,15 +24,17 @@
         <div class="card">
             <div class="card-header">
                 <div class="card-title">Detail Laporan</div>
-                <div style="font-size:13px;color:var(--text-muted);">Kolom dengan tanda <span style="color:var(--danger)">*</span> wajib diisi</div>
+                <div style="font-size:13px;color:var(--text-muted);">Silakan lengkapi formulir di bawah ini</div>
             </div>
             <div class="card-body">
                 <form
                     method="POST"
                     action="{{ route('citizen.reports.store') }}"
                     enctype="multipart/form-data"
+                    novalidate
                     x-data="{
                         previewUrl: null,
+                        showLightbox: false,
                         handleFile(e) {
                             const file = e.target.files[0];
                             if (!file) return;
@@ -50,37 +52,9 @@
                 >
                     @csrf
 
-                    <!-- CLASSIFICATION -->
-                    <div class="form-group">
-                        <label class="form-label">Klasifikasi Laporan <span>*</span></label>
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-
-                            @php
-                            $categories = [
-                                ['label' => 'Infrastruktur Jalan',],
-                                ['label' => 'Penerangan',],
-                                ['label' => 'Drainase',],
-                                ['label' => 'Taman & RTH',],
-                                ['label' => 'Trotoar',],
-                                ['label' => 'Lainnya',],
-                            ];
-                            @endphp
-
-                            @foreach($categories as $cat)
-                            <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-                                <input type="radio" name="_category_hint" value="{{ $cat['label'] }}" style="accent-color:var(--primary);">
-                                <span style="display:inline-flex;align-items:center;gap:5px;font-size:13px;">
-                                    {{ $cat['label'] }}
-                                </span>
-                            </label>
-                            @endforeach
-
-                        </div>
-                    </div>
-
                     <!-- TITLE -->
                     <div class="form-group">
-                        <label class="form-label" for="title">Judul Laporan <span>*</span></label>
+                        <label class="form-label" for="title">Judul Laporan</label>
                         <input
                             id="title"
                             type="text"
@@ -97,7 +71,7 @@
 
                     <!-- DESCRIPTION -->
                     <div class="form-group">
-                        <label class="form-label" for="description">Deskripsi Kronologis <span>*</span></label>
+                        <label class="form-label" for="description">Deskripsi Kronologis</label>
                         <textarea
                             id="description"
                             name="description"
@@ -111,33 +85,77 @@
 
                     <!-- DISTRICT -->
                     <div class="form-group">
-                        <label class="form-label" for="district_id">Lokasi / Kecamatan <span>*</span></label>
-                        <select id="district_id" name="district_id" class="form-select" required>
-                            <option value="">-- Pilih Kecamatan --</option>
-                            @foreach($districts as $d)
-                                <option value="{{ $d->id }}" {{ old('district_id') == $d->id ? 'selected' : '' }}>
+                        <label class="form-label" for="district_id">Lokasi / Kecamatan</label>
+                        <div
+                            x-data="{
+                                open: false,
+                                selected: '{{ old('district_id') }}',
+                                selectedLabel: '{{ $districts->firstWhere('id', old('district_id'))?->name ?? '-- Pilih Kecamatan --' }}'
+                            }"
+                            class="cw-select-wrapper"
+                            style="position:relative;"
+                            @click.outside="open = false"
+                        >
+                            <input type="hidden" name="district_id" :value="selected">
+                            
+                            <button
+                                type="button"
+                                class="cw-select-trigger"
+                                @click="open = !open"
+                                :class="{ 'cw-select-trigger--open': open }"
+                                style="width:100%; display:flex; align-items:center; justify-content:space-between;"
+                            >
+                                <span x-text="selectedLabel"></span>
+                                <svg class="cw-select-chevron" :class="{ 'rotated': open }"
+                                    width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                    <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+
+                            <x-scrollable as="ul" class="cw-select-dropdown" maxHeight="200px" paddingRight="0px" x-show="open" x-transition style="width:100%;">
+                                <li
+                                    class="cw-select-option"
+                                    :class="{ 'cw-select-option--active': selected === '' }"
+                                    @click="selected = ''; selectedLabel = '-- Pilih Kecamatan --'; open = false"
+                                    @mouseenter="$el.classList.add('cw-select-option--hover')"
+                                    @mouseleave="$el.classList.remove('cw-select-option--hover')"
+                                >
+                                    -- Pilih Kecamatan --
+                                </li>
+                                @foreach($districts as $d)
+                                <li
+                                    class="cw-select-option"
+                                    :class="{ 'cw-select-option--active': selected === '{{ $d->id }}' }"
+                                    @click="selected = '{{ $d->id }}'; selectedLabel = '{{ $d->name }}'; open = false"
+                                    @mouseenter="$el.classList.add('cw-select-option--hover')"
+                                    @mouseleave="$el.classList.remove('cw-select-option--hover')"
+                                >
                                     {{ $d->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('district_id')<div class="form-error">{{ $message }}</div>@enderror
+                                </li>
+                                @endforeach
+                            </x-scrollable>
+                        </div>
+                        @error('district_id')<div class="form-error" style="margin-top:4px;">{{ $message }}</div>@enderror
                     </div>
 
                     <!-- PHOTO UPLOAD -->
                     <div class="form-group">
-                        <label class="form-label">Foto Bukti Kerusakan <span>*</span></label>
+                        <label class="form-label">Foto Bukti Kerusakan <span style="font-weight:normal;color:var(--text-muted);font-size:12.5px;margin-left:4px;">(Opsional)</span></label>
 
-                        <!-- Preview Area -->
+                         <!-- Preview Area -->
                         <div x-show="previewUrl" style="margin-bottom:12px;position:relative;">
                             <img
                                 :src="previewUrl"
-                                style="width:100%;max-height:260px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);"
+                                @click="showLightbox = true"
+                                style="width:100%;max-height:260px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);cursor:zoom-in;"
                                 alt="Preview foto"
+                                title="Klik untuk memperbesar"
                             >
                             <button
                                 type="button"
                                 @click="previewUrl=null; $refs.photoInput.value=''"
-                                style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;"
+                                style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;"
                             >
                                 <!-- X close -->
                                 <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round">
@@ -145,6 +163,30 @@
                                     <line x1="6"  y1="6" x2="18" y2="18"/>
                                 </svg>
                             </button>
+
+                            {{-- Lightbox --}}
+                            <div
+                                x-show="showLightbox"
+                                x-cloak
+                                x-transition.opacity
+                                @click.stop="showLightbox = false"
+                                @keydown.escape.window="showLightbox = false"
+                                class="lightbox-overlay"
+                                style="position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 9999; display: grid; place-items: center;">
+                                <button
+                                    type="button"
+                                    @click.stop="showLightbox = false"
+                                    class="lightbox-close"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                                <img
+                                    :src="previewUrl"
+                                    alt="Zoomed preview"
+                                    @click.stop
+                                    style="max-width:90vw; max-height:90vh; width:auto; height:auto; margin:auto; display:block; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,.5); object-fit:contain;"
+                                >
+                            </div>
                         </div>
 
                         <!-- Upload Zone -->
@@ -196,7 +238,7 @@
                     </svg>
                     Status Awal: Menunggu
                 </div>
-                <div style="font-size:12.5px;color:#B45309;line-height:1.6;">Laporan baru Anda akan berstatus <strong>Pending</strong> dan belum tampil di public feed hingga diverifikasi admin.</div>
+                <div style="font-size:12.5px;color:#B45309;line-height:1.6;">Laporan baru Anda akan berstatus <strong>Pending</strong> dan belum tampil di Laporan Publik hingga diverifikasi admin.</div>
             </div>
         </div>
 

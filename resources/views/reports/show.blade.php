@@ -9,18 +9,7 @@
 </head>
 <body class="bg-grid">
 
-{{-- ═══ NAV ═══ --}}
-<nav class="pub-nav">
-    <div class="pub-nav-inner" style="max-width:1100px;">
-        <a href="{{ route('home') }}" class="pub-brand">
-            <span class="pub-brand-text">CivilWatch</span>
-        </a>
-        <a href="{{ route('feed') }}" class="pub-nav-link" style="display:inline-flex;align-items:center;gap:6px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            Kembali ke Feed
-        </a>
-    </div>
-</nav>
+<x-public-nav mode="detail" />
 
 @php
     $statusMap = [
@@ -80,8 +69,9 @@
             </div>
         </div>
         @else
-        <div style="width:100%;height:280px;border-radius:12px;background:linear-gradient(135deg,#EFF6FF,#BFDBFE);display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">
-            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#93C5FD" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div style="width:100%;height:220px;border-radius:12px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--border);gap:12px;color:var(--text-light);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 21H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3m3-3h6l2 3h4a2 2 0 0 1 2 2v9.34m-7.72-2.06a4 4 0 1 1-5.56-5.56"/></svg>
+            <span style="font-size:13.5px;font-style:italic;">Pelapor tidak melampirkan foto bukti</span>
         </div>
         @endif
 
@@ -94,12 +84,12 @@
                         {!! $si !!} {{ $s['label'] }}
                     </span>
                 </div>
-                <h1 style="font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:14px;line-height:1.3;">
+                <h1 style="font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:14px;line-height:1.3;overflow-wrap:break-word;word-break:break-word;">
                     {{ $report->title }}
                 </h1>
-                <p style="font-size:15px;color:var(--text);line-height:1.8;overflow-wrap:break-word;word-break:break-word;">
+                <x-scrollable maxHeight="300px" paddingRight="8px" style="font-size:15px;color:var(--text);line-height:1.8;overflow-wrap:break-word;word-break:break-word;">
                     {{ $report->description }}
-                </p>
+                </x-scrollable>
             </div>
         </div>
 
@@ -114,12 +104,12 @@
                     {{ $report->progressUpdates->count() + 1 }} entri
                 </span>
             </div>
-            <div class="card-body" style="max-height:460px;overflow-y:auto;">
+            <x-scrollable class="card-body" maxHeight="420px" paddingRight="16px">
                 <div class="timeline">
                     {{-- Initial event --}}
                     <div class="timeline-item">
                         <div class="timeline-dot dot-start"></div>
-                        <div class="timeline-date">{{ $report->created_at->format('d M Y, H:i') }}</div>
+                        <div class="timeline-date">{{ $report->created_at->translatedFormat('d M Y, H:i') }}</div>
                         <div class="timeline-content">
                             <div class="timeline-note" style="display:flex;align-items:flex-start;gap:7px;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -131,7 +121,7 @@
                     @forelse($report->progressUpdates as $update)
                     <div class="timeline-item">
                         <div class="timeline-dot {{ $loop->last ? 'dot-end' : 'dot-middle' }}"></div>
-                        <div class="timeline-date">{{ $update->created_at->format('d M Y, H:i') }}</div>
+                        <div class="timeline-date">{{ $update->created_at->translatedFormat('d M Y, H:i') }}</div>
                         <div class="timeline-content">
                             <div class="timeline-note">{{ $update->note }}</div>
                         </div>
@@ -145,7 +135,7 @@
                     </div>
                     @endforelse
                 </div>
-            </div>
+            </x-scrollable>
         </div>
 
     </div>
@@ -219,7 +209,7 @@
                         <div style="font-size:11px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Tanggal Laporan</div>
                         <div style="font-size:13.5px;color:var(--text);font-weight:500;display:flex;align-items:center;gap:5px;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            {{ $report->created_at->format('d M Y') }}
+                            {{ $report->created_at->translatedFormat('d M Y') }}
                         </div>
                     </div>
 

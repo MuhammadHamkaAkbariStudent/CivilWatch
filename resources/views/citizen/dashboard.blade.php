@@ -34,7 +34,7 @@
             </div>
             <div class="stat-label">Laporan Diverifikasi</div>
             <div class="stat-value">{{ $myVerified }}</div>
-            <div class="stat-sub">Sudah tayang di public feed</div>
+            <div class="stat-sub">Sudah tayang di Laporan Publik</div>
         </div>
         <div class="stat-card s-orange">
             <div class="stat-icon s-orange">
@@ -100,7 +100,7 @@
                         </td>
                         <td>
                             <span style="font-size:13px;font-family:'IBM Plex Mono',monospace;color:var(--text-muted);">
-                                {{ $report->created_at->format('d M Y') }}
+                                {{ $report->created_at->translatedFormat('d M Y') }}
                             </span>
                         </td>
                         <td>

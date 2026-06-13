@@ -1,2 +1,5 @@
 *
 !.gitignore
+!reports/
+reports/*
+!reports/dummy-*.jpg

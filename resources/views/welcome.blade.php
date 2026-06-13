@@ -8,30 +8,7 @@
 </head>
 <body class="bg-grid">
 
-{{-- ═══ NAV ═══ --}}
-<nav class="pub-nav">
-    <div class="pub-nav-inner">
-        <a href="{{ route('home') }}" class="pub-brand">
-            <span class="pub-brand-text">CivilWatch</span>
-        </a>
-        <div class="pub-nav-links">
-            <a href="{{ route('feed') }}" class="pub-nav-link">Public Feed</a>
-            <a href="#cara-kerja" class="pub-nav-link">Cara Kerja</a>
-        </div>
-        <div class="pub-nav-auth">
-            @auth
-                @if(Auth::user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="pub-nav-btn pub-nav-btn-primary">Dashboard</a>
-                @else
-                    <a href="{{ route('citizen.dashboard') }}" class="pub-nav-btn pub-nav-btn-primary">Dashboard</a>
-                @endif
-            @else
-                <a href="{{ route('login') }}"    class="pub-nav-btn pub-nav-btn-outline">Masuk</a>
-                <a href="{{ route('register') }}" class="pub-nav-btn pub-nav-btn-primary">Daftar</a>
-            @endauth
-        </div>
-    </div>
-</nav>
+<x-public-nav active="home" />
 
 {{-- ═══ HERO ═══ --}}
 <section>

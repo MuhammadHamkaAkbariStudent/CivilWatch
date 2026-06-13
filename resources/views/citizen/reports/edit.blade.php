@@ -40,9 +40,11 @@
                     method="POST"
                     action="{{ route('citizen.reports.update', $report->id) }}"
                     enctype="multipart/form-data"
+                    novalidate
                     x-data="{
                         previewUrl: {{ $report->image ? '\'' . asset('storage/'.$report->image) . '\'' : 'null' }},
                         hasNewFile: false,
+                        showModal: false,
                         handleFile(e) {
                             const file = e.target.files[0];
                             if (!file) return;
@@ -63,7 +65,7 @@
 
                     <!-- TITLE -->
                     <div class="form-group">
-                        <label class="form-label" for="title">Judul Laporan <span>*</span></label>
+                        <label class="form-label" for="title">Judul Laporan</label>
                         <input
                             id="title"
                             type="text"
@@ -80,7 +82,7 @@
 
                     <!-- DESCRIPTION -->
                     <div class="form-group">
-                        <label class="form-label" for="description">Deskripsi Kronologis <span>*</span></label>
+                        <label class="form-label" for="description">Deskripsi Kronologis</label>
                         <textarea
                             id="description"
                             name="description"
@@ -94,16 +96,68 @@
 
                     <!-- DISTRICT -->
                     <div class="form-group">
-                        <label class="form-label" for="district_id">Lokasi / Kecamatan <span>*</span></label>
-                        <select id="district_id" name="district_id" class="form-select" required {{ !$report->isEditable() ? 'disabled' : '' }}>
-                            <option value="">-- Pilih Kecamatan --</option>
-                            @foreach($districts as $d)
-                                <option value="{{ $d->id }}" {{ (old('district_id', $report->district_id) == $d->id) ? 'selected' : '' }}>
-                                    {{ $d->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('district_id')<div class="form-error">{{ $message }}</div>@enderror
+                        <label class="form-label" for="district_id">Lokasi / Kecamatan</label>
+                        @if(!$report->isEditable())
+                            {{-- If not editable, show read-only button and static label --}}
+                            <div class="cw-select-wrapper">
+                                <button type="button" class="cw-select-trigger" disabled style="width:100%; display:flex; align-items:center; justify-content:space-between; opacity:0.6; cursor:not-allowed;">
+                                    <span>{{ $report->district->name ?? '-' }}</span>
+                                </button>
+                                <input type="hidden" name="district_id" value="{{ $report->district_id }}">
+                            </div>
+                        @else
+                            <div
+                                x-data="{
+                                    open: false,
+                                    selected: '{{ old('district_id', $report->district_id) }}',
+                                    selectedLabel: '{{ $districts->firstWhere('id', old('district_id', $report->district_id))?->name ?? '-- Pilih Kecamatan --' }}'
+                                }"
+                                class="cw-select-wrapper"
+                                style="position:relative;"
+                                @click.outside="open = false"
+                            >
+                                <input type="hidden" name="district_id" :value="selected">
+                                
+                                <button
+                                    type="button"
+                                    class="cw-select-trigger"
+                                    @click="open = !open"
+                                    :class="{ 'cw-select-trigger--open': open }"
+                                    style="width:100%; display:flex; align-items:center; justify-content:space-between;"
+                                >
+                                    <span x-text="selectedLabel"></span>
+                                    <svg class="cw-select-chevron" :class="{ 'rotated': open }"
+                                        width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+
+                                <x-scrollable as="ul" class="cw-select-dropdown" maxHeight="200px" paddingRight="0px" x-show="open" x-transition style="width:100%;">
+                                    <li
+                                        class="cw-select-option"
+                                        :class="{ 'cw-select-option--active': selected === '' }"
+                                        @click="selected = ''; selectedLabel = '-- Pilih Kecamatan --'; open = false"
+                                        @mouseenter="$el.classList.add('cw-select-option--hover')"
+                                        @mouseleave="$el.classList.remove('cw-select-option--hover')"
+                                    >
+                                        -- Pilih Kecamatan --
+                                    </li>
+                                    @foreach($districts as $d)
+                                    <li
+                                        class="cw-select-option"
+                                        :class="{ 'cw-select-option--active': selected === '{{ $d->id }}' }"
+                                        @click="selected = '{{ $d->id }}'; selectedLabel = '{{ $d->name }}'; open = false"
+                                        @mouseenter="$el.classList.add('cw-select-option--hover')"
+                                        @mouseleave="$el.classList.remove('cw-select-option--hover')"
+                                    >
+                                        {{ $d->name }}
+                                    </li>
+                                    @endforeach
+                                </x-scrollable>
+                            </div>
+                        @endif
+                        @error('district_id')<div class="form-error" style="margin-top:4px;">{{ $message }}</div>@enderror
                     </div>
 
                     <!-- PHOTO -->
@@ -112,7 +166,36 @@
                         <div style="margin-bottom:12px;">
                             <!-- Current / Preview -->
                             <div x-show="previewUrl" style="position:relative;margin-bottom:10px;">
-                                <img :src="previewUrl" style="width:100%;max-height:240px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);" alt="Preview foto">
+                                <img
+                                    :src="previewUrl"
+                                    @click="showModal = true"
+                                    style="width:100%;max-height:240px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);cursor:zoom-in;"
+                                    alt="Preview foto"
+                                    title="Klik untuk memperbesar"
+                                >
+                                {{-- Lightbox --}}
+                                <div
+                                    x-show="showModal"
+                                    x-cloak
+                                    x-transition.opacity
+                                    @click="showModal = false"
+                                    @keydown.escape.window="showModal = false"
+                                    class="lightbox-overlay"
+                                    style="position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 9999; display: grid; place-items: center;">
+                                    <button
+                                        type="button"
+                                        @click.stop="showModal = false"
+                                        class="lightbox-close"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                    <img
+                                        :src="previewUrl"
+                                        alt="Zoomed preview"
+                                        @click.stop
+                                        style="max-width:90vw; max-height:90vh; width:auto; height:auto; margin:auto; display:block; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,.5); object-fit:contain;"
+                                    >
+                                </div>
                                 <div
                                     x-show="hasNewFile"
                                     style="position:absolute;top:8px;left:8px;background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:3px 9px;border-radius:12px;display:flex;align-items:center;gap:4px;"
@@ -188,7 +271,7 @@
                         </div>
                         <div>
                             <div style="font-size:11px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Dibuat</div>
-                            <div style="font-size:13px;font-family:'IBM Plex Mono',monospace;color:var(--text);">{{ $report->created_at->format('d M Y, H:i') }}</div>
+                            <div style="font-size:13px;font-family:'IBM Plex Mono',monospace;color:var(--text);">{{ $report->created_at->translatedFormat('d M Y, H:i') }}</div>
                         </div>
                         <div>
                             <div style="font-size:11px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Wilayah</div>

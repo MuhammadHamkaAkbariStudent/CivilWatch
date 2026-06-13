@@ -51,9 +51,36 @@
 
             <!-- REPORT IMAGE -->
             @if($report->image)
-            <div class="card" style="overflow:hidden;">
-                <img src="{{ asset('storage/'.$report->image) }}" alt="{{ $report->title }}" style="width:100%;max-height:360px;object-fit:cover;">
-                <div style="padding:12px 16px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+            <div class="card" style="overflow:hidden;" x-data="{ showModal: false }">
+                <img
+                    src="{{ asset('storage/'.$report->image) }}"
+                    alt="{{ $report->title }}"
+                    @click="showModal = true"
+                    style="width:100%;max-height:360px;object-fit:cover;cursor:zoom-in;"
+                    title="Klik untuk memperbesar"
+                >
+                {{-- Lightbox --}}
+                <div
+                    x-show="showModal"
+                    x-cloak
+                    x-transition.opacity
+                    @click="showModal = false"
+                    @keydown.escape.window="showModal = false"
+                    class="lightbox-overlay"
+                    style="position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 9999; display: grid; place-items: center;">
+                    <button
+                        type="button"
+                        @click.stop="showModal = false"
+                        class="lightbox-close"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                    <img
+                        src="{{ asset('storage/'.$report->image) }}"
+                        alt="{{ $report->title }}"
+                        @click.stop
+                        style="max-width:90vw; max-height:90vh; width:auto; height:auto; margin:auto; display:block; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,.5); object-fit:contain;"
+                    >
                 </div>
             </div>
             @else
@@ -76,10 +103,10 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <h2 style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:16px;line-height:1.3;">{{ $report->title }}</h2>
-                    <div style="font-size:15px;color:var(--text);line-height:1.8;max-height:420px;overflow-y:auto;overflow-wrap:break-word;word-break:break-word;scrollbar-width:thin;scrollbar-color:#CBD5E1 transparent;">
+                    <h2 style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:16px;line-height:1.3;overflow-wrap:break-word;word-break:break-word;">{{ $report->title }}</h2>
+                    <x-scrollable maxHeight="420px" paddingRight="8px" style="font-size:15px;color:var(--text);line-height:1.8;overflow-wrap:break-word;word-break:break-word;">
                         {{ $report->description }}
-                    </div>
+                    </x-scrollable>
                 </div>
             </div>
 
@@ -94,14 +121,14 @@
                         <span style="font-size:12px;color:var(--text);font-family:'IBM Plex Mono',monospace;">{{ $report->progressUpdates->count() + 1 }} entri</span>
                     </div>
                 </div>
-                <div class="card-body" style="max-height:420px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#CBD5E1 transparent;">
+                <x-scrollable class="card-body" maxHeight="420px" paddingRight="16px">
                     <div class="timeline" style="position:relative;padding-left:28px;">
                         <div style="position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border);"></div>
 
                         <!-- Initial event -->
                         <div style="position:relative;margin-bottom:20px;">
                             <div style="position:absolute;left:-25px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--primary);border:2px solid var(--surface);"></div>
-                            <div style="font-size:11px;color:var(--text-light);font-family:'IBM Plex Mono',monospace;margin-bottom:5px;">{{ $report->created_at->format('d M Y, H:i') }}</div>
+                            <div style="font-size:11px;color:var(--text-light);font-family:'IBM Plex Mono',monospace;margin-bottom:5px;">{{ $report->created_at->translatedFormat('d M Y, H:i') }}</div>
                             <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
                                 <div style="font-size:13.5px;color:var(--text);line-height:1.6;overflow-wrap:break-word;word-break:break-word;display:flex;align-items:flex-start;gap:7px;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -113,7 +140,7 @@
                         @forelse($report->progressUpdates as $update)
                         <div style="position:relative;margin-bottom:20px;">
                             <div style="position:absolute;left:-25px;top:3px;width:16px;height:16px;border-radius:50%;background:{{ $loop->last ? 'var(--success)' : 'var(--warning)' }};border:2px solid var(--surface);"></div>
-                            <div style="font-size:11px;color:var(--text-light);font-family:'IBM Plex Mono',monospace;margin-bottom:5px;">{{ $update->created_at->format('d M Y, H:i') }}</div>
+                            <div style="font-size:11px;color:var(--text-light);font-family:'IBM Plex Mono',monospace;margin-bottom:5px;">{{ $update->created_at->translatedFormat('d M Y, H:i') }}</div>
                             <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
                                 <div style="font-size:13.5px;color:var(--text);line-height:1.6;overflow-wrap:break-word;word-break:break-word;">{{ $update->note }}</div>
                             </div>
@@ -127,7 +154,7 @@
                         </div>
                         @endforelse
                     </div>
-                </div>
+                </x-scrollable>
 
                 <!-- ADD NOTE FORM -->
                 <div style="padding:20px 24px;border-top:1px solid var(--border);background:var(--bg);">
@@ -290,7 +317,7 @@
                             <div style="font-size:11px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;">Tanggal Laporan</div>
                             <div style="font-size:13px;font-family:'IBM Plex Mono',monospace;color:var(--text);font-weight:500;display:flex;align-items:center;gap:5px;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                {{ $report->created_at->format('d M Y, H:i') }}
+                                {{ $report->created_at->translatedFormat('d M Y, H:i') }}
                             </div>
                         </div>
 

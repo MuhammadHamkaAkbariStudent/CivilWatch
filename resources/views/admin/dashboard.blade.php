@@ -159,7 +159,7 @@
                     </svg>
                     Tren Laporan 6 Bulan Terakhir
                 </div>
-                <a href="{{ route('admin.reports.index') }}" class="btn btn-outline btn-sm" style="background:var(--surface);color:var(--text);">Lihat Semua</a>
+                <a href="{{ route('admin.reports.index') }}" class="btn btn-outline btn-sm" style="background:var(--surface);color:var(--primary);">Lihat Semua</a>
             </div>
             <div class="card-body" style="padding:20px 24px;">
                 @if($monthlyTrend->count() > 0)
@@ -173,9 +173,11 @@
                     @endphp
                     <div style="display:flex;align-items:center;gap:12px;">
                         <div style="width:90px;font-size:12.5px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;flex-shrink:0;">{{ $monthName }}</div>
-                        <div style="flex:1;height:28px;background:var(--bg);border-radius:6px;overflow:hidden;position:relative;">
-                            <div style="height:100%;width:{{ $pct }}%;background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:6px;transition:width .3s;"></div>
-                            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:var(--text);font-family:'IBM Plex Mono',monospace;">{{ $trend->total }}</span>
+                        <div style="flex:1;display:flex;align-items:center;gap:12px;">
+                            <div style="flex:1;height:12px;background:var(--bg);border-radius:6px;overflow:hidden;">
+                                <div style="height:100%;width:{{ $pct }}%;background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:6px;transition:width .3s;"></div>
+                            </div>
+                            <span style="font-size:13px;font-weight:600;color:var(--text);font-family:'IBM Plex Mono',monospace;min-width:20px;text-align:right;">{{ $trend->total }}</span>
                         </div>
                     </div>
                     @endforeach
@@ -207,7 +209,7 @@
                     </svg>
                     Prioritas Wilayah
                 </div>
-                <a href="{{ route('admin.districts.index') }}" class="btn btn-outline btn-sm" style="background:var(--surface);color:var(--text);">Kelola</a>
+                <a href="{{ route('admin.districts.index') }}" class="btn btn-outline btn-sm" style="background:var(--surface);color:var(--primary);">Kelola</a>
             </div>
             <div class="card-body" style="padding:20px 24px;">
                 @if($priorityDistricts->count() > 0)
