@@ -295,24 +295,46 @@
                 </div>
             </div>
 
-            <!-- Delete Section -->
-            @if($report->isEditable())
-            <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:14px 16px;">
-                <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+           <!-- DANGER ZONE -->
+            <div class="danger-zone" x-data="{ open: false }">
+                <div class="danger-zone-desc">Menghapus laporan ini akan menghapus semua data terkait termasuk foto, catatan progres, dan upvote secara <strong>permanen</strong>. Tindakan ini tidak dapat dibatalkan.</div>
+
+                <button type="button" @click="open = true" class="btn btn-danger" style="width:100%;justify-content:center;margin-top:12px;display:inline-flex;align-items:center;gap:7px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                    Hapus Laporan
+                    Hapus Laporan Ini
+                </button>
+
+                <div x-show="open"
+                    style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:9999;"
+                    x-transition.opacity
+                    @keydown.escape.window="open = false">
+
+                    <div @click.away="open = false"
+                        style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#FFF;width:90%;max-width:400px;padding:24px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.2);box-sizing:border-box;text-align:left;">
+
+                        <div style="font-size:18px;font-weight:600;color:#991B1B;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#991B1B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            Konfirmasi Penghapusan
+                        </div>
+
+                        <div style="font-size:14px;color:#475569;margin-bottom:24px;line-height:1.6;">
+                            Anda akan menghapus laporan <strong>"{{ Str::limit($report->title, 40) }}"</strong> secara permanen.
+                        </div>
+
+                        <form method="POST" action="{{ route('admin.reports.destroy', $report->id) }}">
+                            @csrf
+                            @method('DELETE')
+                            <div style="display:flex;justify-content:center;gap:10px;">
+                                <button type="button" @click="open = false" class="btn btn-outline btn-sm">Batal</button>
+                                <button type="submit" class="btn btn-danger btn-sm" style="background:var(--danger);color:#fff;border-color:var(--danger);display:inline-flex;align-items:center;gap:6px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                                    Hapus
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div style="font-size:12.5px;color:#7F1D1D;line-height:1.7;margin-bottom:12px;">Menghapus laporan akan menghapus semua data termasuk foto secara permanen.</div>
-                <form method="POST" action="{{ route('citizen.reports.destroy', $report->id) }}" onsubmit="return confirm('Yakin ingin menghapus laporan ini secara permanen?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center;display:inline-flex;align-items:center;gap:7px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                        Hapus Laporan Ini
-                    </button>
-                </form>
             </div>
-            @endif
         </div>
     </div>
 </x-app-layout>
